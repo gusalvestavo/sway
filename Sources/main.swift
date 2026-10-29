@@ -60,7 +60,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         overlay.onEnd = { [unowned self] in startWork() }
         overlay.onPostpone = { [unowned self] minutes in startWork(after: minutes * 60) }
         warning.onStartNow = { [unowned self] in startBreak() }
-        warning.onPostpone = { [unowned self] in startWork(after: 5 * 60) }
+        warning.onSnooze = { [unowned self] minutes in addTime(minutes: minutes) }
         statusItem.button?.imagePosition = .imageLeading
         let menu = NSMenu()
         menu.delegate = self
@@ -146,9 +146,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let title: String
         switch phase {
         case .working: title = short(remainingSeconds)
-        case .onBreak: title = "Break \(short(remainingSeconds))"
-        case .breakOver: title = "Break done"
-        case .paused: title = "Paused \(short(Int(pausedRemaining)))"
+        case .onBreak: title = L("Break %@", short(remainingSeconds))
+        case .breakOver: title = L("Break done")
+        case .paused: title = L("Paused %@", short(Int(pausedRemaining)))
         }
         statusItem.button?.title = " " + title
         let image = phase == .paused ? SwayMark.pausedMenuBarImage : SwayMark.menuBarImage
@@ -159,13 +159,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var headerState: HeaderState {
         switch phase {
         case .working:
-            HeaderState(caption: "Next break in", value: clock(remainingSeconds), showsAddTime: true)
+            HeaderState(caption: L("Next break in"), value: clock(remainingSeconds), showsAddTime: true)
         case .onBreak:
-            HeaderState(caption: "On a break", value: clock(remainingSeconds), showsAddTime: false)
+            HeaderState(caption: L("On a break"), value: clock(remainingSeconds), showsAddTime: false)
         case .breakOver:
-            HeaderState(caption: "Break's over", value: "Welcome back", showsAddTime: false)
+            HeaderState(caption: L("Break's over"), value: L("Welcome back"), showsAddTime: false)
         case .paused:
-            HeaderState(caption: "\(clock(Int(pausedRemaining))) left", value: "Paused", showsAddTime: true)
+            HeaderState(caption: L("%@ left", clock(Int(pausedRemaining))), value: L("Paused"), showsAddTime: true)
         }
     }
 
@@ -181,21 +181,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         self.header = header
 
         switch phase {
-        case .onBreak: menu.addItem(item("End break now", #selector(endBreak)))
-        case .breakOver: menu.addItem(item("Back to work", #selector(endBreak)))
-        case .working, .paused: menu.addItem(item("Take a break now", #selector(breakNow)))
+        case .onBreak: menu.addItem(item(L("End break now"), #selector(endBreak)))
+        case .breakOver: menu.addItem(item(L("Back to work"), #selector(endBreak)))
+        case .working, .paused: menu.addItem(item(L("Take a break now"), #selector(breakNow)))
         }
-        menu.addItem(item(phase == .paused ? "Resume" : "Pause", #selector(togglePause)))
-        menu.addItem(item("Restart timer", #selector(restart)))
+        menu.addItem(item(phase == .paused ? L("Resume") : L("Pause"), #selector(togglePause)))
+        menu.addItem(item(L("Restart timer"), #selector(restart)))
         menu.addItem(.separator())
 
-        menu.addItem(submenu(title: "Remind me every", options: [20, 30, 45, 60, 90].map { $0 * 60 },
+        menu.addItem(submenu(title: L("Remind me every"), options: [20, 30, 45, 60, 90].map { $0 * 60 },
                              current: Settings.workSeconds, action: #selector(setWork(_:)),
                              customAction: #selector(customWork)))
-        menu.addItem(submenu(title: "Break length", options: [2, 5, 10, 15].map { $0 * 60 },
+        menu.addItem(submenu(title: L("Break length"), options: [2, 5, 10, 15].map { $0 * 60 },
                              current: Settings.breakSeconds, action: #selector(setBreak(_:)),
                              customAction: #selector(customBreak)))
-        menu.addItem(submenu(title: "Warn me before breaks", options: [0, 30, 60, 120, 300],
+        menu.addItem(submenu(title: L("Warn me before breaks"), options: [0, 30, 60, 120, 300],
                              current: Settings.warnSeconds, action: #selector(setWarn(_:)),
                              customAction: #selector(customWarn)))
         if intervalOverride != nil || breakOverride != nil || warnOverride != nil {
@@ -206,14 +206,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
 
         menu.addItem(.separator())
-        let login = item("Launch at Login", #selector(toggleLaunchAtLogin))
+        let login = item(L("Launch at Login"), #selector(toggleLaunchAtLogin))
         switch SMAppService.mainApp.status {
         case .enabled: login.state = .on
         case .requiresApproval: login.state = .mixed
         default: login.state = .off
         }
         menu.addItem(login)
-        menu.addItem(item("Quit Sway", #selector(quit), key: "q"))
+        menu.addItem(item(L("Quit Sway"), #selector(quit), key: "q"))
     }
 
     func menuDidClose(_ menu: NSMenu) {
@@ -237,7 +237,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             sub.addItem(option)
         }
         sub.addItem(.separator())
-        sub.addItem(item("Custom…", customAction))
+        sub.addItem(item(L("Custom…"), customAction))
         parent.submenu = sub
         return parent
     }
@@ -295,8 +295,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         } catch {
             NSApp.activate(ignoringOtherApps: true)
             let alert = NSAlert()
-            alert.messageText = "Couldn't change Launch at Login"
-            alert.informativeText = "\(error.localizedDescription)\n\nMove Sway to your Applications folder and try again."
+            alert.messageText = L("Couldn't change Launch at Login")
+            alert.informativeText = error.localizedDescription + "\n\n" + L("Move Sway to your Applications folder and try again.")
             alert.runModal()
         }
         // macOS may ask you to approve the login item in System Settings first.
@@ -322,21 +322,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     @objc private func customWarn() {
-        if let minutes = askMinutes("Warn me how many minutes before a break?", current: Settings.warnSeconds / 60) {
+        if let minutes = askMinutes(L("Warn me how many minutes before a break?"), current: Settings.warnSeconds / 60) {
             Settings.warnSeconds = minutes * 60
             updateDisplay()
         }
     }
 
     @objc private func customWork() {
-        if let minutes = askMinutes("Remind me every how many minutes?", current: Settings.workSeconds / 60) {
+        if let minutes = askMinutes(L("Remind me every how many minutes?"), current: Settings.workSeconds / 60) {
             Settings.workSeconds = minutes * 60
             startWork()
         }
     }
 
     @objc private func customBreak() {
-        if let minutes = askMinutes("Break length in minutes?", current: Settings.breakSeconds / 60) {
+        if let minutes = askMinutes(L("Break length in minutes?"), current: Settings.breakSeconds / 60) {
             Settings.breakSeconds = minutes * 60
             updateDisplay()
         }
@@ -346,8 +346,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         NSApp.activate(ignoringOtherApps: true)
         let alert = NSAlert()
         alert.messageText = question
-        alert.addButton(withTitle: "Save")
-        alert.addButton(withTitle: "Cancel")
+        alert.addButton(withTitle: L("Save"))
+        alert.addButton(withTitle: L("Cancel"))
         let field = NSTextField(frame: NSRect(x: 0, y: 0, width: 120, height: 24))
         field.stringValue = String(current)
         alert.accessoryView = field
@@ -376,9 +376,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     private func format(_ seconds: Int) -> String {
         switch seconds {
-        case 0: "Off"
-        case ..<60: "\(seconds) sec"
-        default: "\(seconds / 60) min"
+        case 0: L("Off")
+        case ..<60: L("%d sec", seconds)
+        default: L("%d min", seconds / 60)
         }
     }
 }

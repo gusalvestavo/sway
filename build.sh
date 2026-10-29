@@ -18,6 +18,8 @@ lipo -create -output "$APP/Contents/MacOS/Sway" "$TMP/Sway-arm64" "$TMP/Sway-x86
 xcrun actool Resources/AppIcon.icon --compile "$APP/Contents/Resources" --app-icon AppIcon \
     --platform macosx --minimum-deployment-target 13.0 --target-device mac \
     --output-partial-info-plist /dev/null > /dev/null
+# Translations: one <language>.lproj folder per language.
+cp -R Resources/*.lproj "$APP/Contents/Resources/"
 
 cat > "$APP/Contents/Info.plist" <<'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
@@ -25,6 +27,7 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
 <plist version="1.0">
 <dict>
     <key>CFBundleIdentifier</key><string>local.sway</string>
+    <key>CFBundleDevelopmentRegion</key><string>en</string>
     <key>CFBundleName</key><string>Sway</string>
     <key>CFBundleDisplayName</key><string>Sway</string>
     <key>CFBundleExecutable</key><string>Sway</string>

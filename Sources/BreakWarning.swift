@@ -4,7 +4,8 @@ import AppKit
 @MainActor
 final class BreakWarning: NSObject {
     var onStartNow: () -> Void = {}
-    var onPostpone: () -> Void = {}
+    /// Adds the given number of minutes to the countdown.
+    var onSnooze: (Int) -> Void = { _ in }
 
     private let popover = NSPopover()
     private let titleLabel = NSTextField(labelWithString: "")
@@ -25,7 +26,7 @@ final class BreakWarning: NSObject {
         let icon = NSImageView(image: mark)
 
         titleLabel.font = .systemFont(ofSize: 13, weight: .semibold)
-        let subtitle = NSTextField(labelWithString: "Start wrapping up what you're doing.")
+        let subtitle = NSTextField(labelWithString: L("Start wrapping up what you're doing."))
         subtitle.font = .systemFont(ofSize: 11)
         subtitle.textColor = .secondaryLabelColor
         let text = NSStackView(views: [titleLabel, subtitle])
@@ -36,12 +37,23 @@ final class BreakWarning: NSObject {
         let header = NSStackView(views: [icon, text])
         header.spacing = 10
 
-        let startNow = NSButton(title: "Start now", target: self, action: #selector(startNowTapped))
-        let postpone = NSButton(title: "Postpone 5 min", target: self, action: #selector(postponeTapped))
-        for button in [startNow, postpone] { button.controlSize = .small }
+        let startNow = NSButton(title: L("Start now"), target: self, action: #selector(startNowTapped))
+        startNow.controlSize = .small
         startNow.useGlass(tint: SwayMark.sage)
-        postpone.useGlass()
-        let buttons = NSStackView(views: [startNow, postpone])
+
+        // Same snooze choices as the break overlay.
+        let zzz = NSImage(systemSymbolName: "zzz", accessibilityDescription: nil)?
+            .withSymbolConfiguration(.init(pointSize: 10, weight: .semibold))
+        let snoozeButtons = BreakOverlay.snoozeOptions.map { minutes in
+            let button = NSButton(title: L("+%d min", minutes), image: zzz ?? NSImage(), target: self,
+                                  action: #selector(snoozeTapped(_:)))
+            button.tag = minutes
+            button.imagePosition = .imageLeading
+            button.controlSize = .small
+            button.useGlass()
+            return button
+        }
+        let buttons = NSStackView(views: [startNow] + snoozeButtons)
         buttons.spacing = 6
 
         let stack = NSStackView(views: [header, buttons])
@@ -59,6 +71,13 @@ final class BreakWarning: NSObject {
 
     func show(relativeTo button: NSStatusBarButton, remaining: TimeInterval) {
         update(remaining: remaining)
+        // Size the popover to its content so the button row is never clipped.
+        if let content = popover.contentViewController?.view {
+            content.layoutSubtreeIfNeeded()
+            // Glass buttons draw slightly wider than their layout size, so add the trailing margin back.
+            let fitting = content.fittingSize
+            popover.contentSize = NSSize(width: fitting.width + 14, height: fitting.height)
+        }
         popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
         hideTimer?.invalidate()
         hideTimer = Timer.scheduledTimer(timeInterval: visibleSeconds, target: self,
@@ -67,7 +86,7 @@ final class BreakWarning: NSObject {
 
     func update(remaining: TimeInterval) {
         let seconds = max(0, Int(remaining.rounded(.up)))
-        titleLabel.stringValue = String(format: "Break in %d:%02d", seconds / 60, seconds % 60)
+        titleLabel.stringValue = L("Break in %d:%02d", seconds / 60, seconds % 60)
     }
 
     func close() {
@@ -83,8 +102,8 @@ final class BreakWarning: NSObject {
         onStartNow()
     }
 
-    @objc private func postponeTapped() {
+    @objc private func snoozeTapped(_ sender: NSButton) {
         close()
-        onPostpone()
+        onSnooze(sender.tag)
     }
 }

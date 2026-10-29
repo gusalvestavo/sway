@@ -23,6 +23,8 @@ final class BreakOverlay: NSObject {
 
     /// How long a break must run before it can be skipped.
     static let skipDelay: TimeInterval = 5
+    /// Snooze choices in minutes, shared with the heads-up popover.
+    static let snoozeOptions = [1, 3, 5]
     private var skipUnlocksAt = Date()
 
     private var windows: [NSWindow] = []
@@ -45,7 +47,7 @@ final class BreakOverlay: NSObject {
     }
 
     func show(duration: TimeInterval) {
-        message = peaceMessages.randomElement()!
+        message = L(peaceMessages.randomElement()!)
         total = max(1, duration)
         remaining = duration
         finished = false
@@ -184,13 +186,13 @@ private final class OverlayPanel: BackdropView {
     init(message: String, target: BreakOverlay, skipUnlocksAt: Date) {
         self.skipUnlocksAt = skipUnlocksAt
         messageLabel = NSTextField(wrappingLabelWithString: message)
-        skipButton = Self.button("Skip break", symbol: "forward.fill", target: target,
+        skipButton = Self.button(L("Skip break"), symbol: "forward.fill", target: target,
                                  action: #selector(BreakOverlay.endTapped))
-        lockButton = Self.button("Lock screen", symbol: "lock.fill", target: target,
+        lockButton = Self.button(L("Lock screen"), symbol: "lock.fill", target: target,
                                  action: #selector(BreakOverlay.lockTapped))
 
-        let snoozeButtons = [1, 3, 5].map { minutes in
-            let button = Self.button("+\(minutes) min", symbol: "zzz", target: target,
+        let snoozeButtons = BreakOverlay.snoozeOptions.map { minutes in
+            let button = Self.button(L("+%d min", minutes), symbol: "zzz", target: target,
                                      action: #selector(BreakOverlay.postponeTapped(_:)))
             button.tag = minutes
             return button
@@ -260,7 +262,7 @@ private final class OverlayPanel: BackdropView {
         ring.setProgress(progress, animated: animated)
         let seconds = Int(remaining.rounded(.up))
         timeLabel.stringValue = finished ? "✓" : String(format: "%d:%02d", seconds / 60, seconds % 60)
-        titleLabel.stringValue = finished ? "Break's over" : "Time for a break"
+        titleLabel.stringValue = finished ? L("Break's over") : L("Time for a break")
         snoozeRow.isHidden = finished
         lockButton.isHidden = finished
         waitTick()
@@ -273,7 +275,7 @@ private final class OverlayPanel: BackdropView {
             waitTimer?.invalidate()
             waitTimer = nil
             skipButton.isEnabled = true
-            skipButton.title = finished ? "Back to work" : "Skip break"
+            skipButton.title = finished ? L("Back to work") : L("Skip break")
             skipButton.image = Self.symbol(finished ? "checkmark" : "forward.fill")
         } else {
             skipButton.isEnabled = false

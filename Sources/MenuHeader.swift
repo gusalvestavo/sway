@@ -20,7 +20,7 @@ final class MenuHeaderView: NSView {
 
     init(state: HeaderState) {
         let buttons = Self.addTimeOptions.map { minutes in
-            let button = NSButton(title: "+\(minutes) min", target: nil, action: nil)
+            let button = NSButton(title: L("+%d min", minutes), target: nil, action: nil)
             button.tag = minutes
             button.controlSize = .small
             button.useGlass()
