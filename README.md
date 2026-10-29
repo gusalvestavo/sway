@@ -28,4 +28,6 @@ Designed to encourage you to respect your time.
 ## Support
 
 Sway is free and always will be. If it helps you take better breaks and you’d like to say thanks, you can
-<script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="gusalvestavo" data-color="#FFDD00" data-emoji=""  data-font="Cookie" data-text="Buy me a coffee" data-outline-color="#000000" data-font-color="#000000" data-coffee-color="#ffffff" ></script>
+buy me a coffee.
+
+<a href="https://www.buymeacoffee.com/gusalvestavo"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy me a coffee" height="40"></a>
