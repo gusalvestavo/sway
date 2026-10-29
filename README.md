@@ -8,6 +8,14 @@ A small macOS menu bar app that reminds you to take breaks.
 
 Designed to encourage you to respect your time.
 
+<p align="center">
+  <img src="docs/break.gif" alt="Sway's break overlay: the logo fills up as the break runs, then Skip break unlocks and the break ends with Back to work" width="480">
+</p>
+
+<p align="center">
+  <img src="docs/popover.png" alt="The heads-up popover under Sway's menu bar icon: Break in 0:04, with Start now and Postpone 5 min" width="360">
+</p>
+
 ## Features
 
 - **Menu bar countdown** to your next break, shown as hours and minutes (`1h20m`, `40m`). A tiny pause badge appears on the logo while paused.
@@ -24,6 +32,10 @@ Designed to encourage you to respect your time.
 
 - macOS 13 or later (Liquid Glass on macOS 26+)
 - Xcode, for `swiftc` and `actool` (the icon compiler)
+
+## License
+
+Sway is open source under the [MIT License](LICENSE).
 
 ## Support
 
