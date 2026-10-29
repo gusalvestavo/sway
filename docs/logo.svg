@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="212 212 600 600">
+  <!-- The Sway mark, same geometry as Resources/AppIcon.icon. -->
+  <path d="M 695.1 328.9 A 259 259 0 1 1 467.0 256.9" fill="none" stroke="#52745C" stroke-width="42" stroke-linecap="round"/>
+  <circle cx="512" cy="512" r="134.7" fill="none" stroke="#9DB3A3" stroke-width="15"/>
+</svg>
