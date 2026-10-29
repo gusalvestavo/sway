@@ -7,7 +7,13 @@ APP=Sway.app
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 
-swiftc -O -target "$(uname -m)-apple-macosx13.0" -o "$APP/Contents/MacOS/Sway" Sources/*.swift
+# Universal binary, so the app runs on both Apple silicon and Intel Macs.
+TMP=$(mktemp -d)
+trap 'rm -rf "$TMP"' EXIT
+for arch in arm64 x86_64; do
+    swiftc -O -target "$arch-apple-macosx13.0" -o "$TMP/Sway-$arch" Sources/*.swift
+done
+lipo -create -output "$APP/Contents/MacOS/Sway" "$TMP/Sway-arm64" "$TMP/Sway-x86_64"
 # Compiles the layered Icon Composer icon (Assets.car), plus an .icns fallback for older macOS.
 xcrun actool Resources/AppIcon.icon --compile "$APP/Contents/Resources" --app-icon AppIcon \
     --platform macosx --minimum-deployment-target 13.0 --target-device mac \
@@ -26,6 +32,7 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
     <key>CFBundleIconName</key><string>AppIcon</string>
     <key>CFBundlePackageType</key><string>APPL</string>
     <key>CFBundleShortVersionString</key><string>1.0</string>
+    <key>CFBundleVersion</key><string>1</string>
     <key>LSMinimumSystemVersion</key><string>13.0</string>
     <key>LSUIElement</key><true/>
 </dict>
