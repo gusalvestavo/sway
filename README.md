@@ -6,7 +6,7 @@
 
 A small macOS menu bar app that reminds you to take breaks.
 
-Sage green · Soft geometry · A subtle sense of movement
+Designed to encourage you to respect your time.
 
 ## Features
 
@@ -24,11 +24,3 @@ Sage green · Soft geometry · A subtle sense of movement
 
 - macOS 13 or later (Liquid Glass on macOS 26+)
 - Xcode, for `swiftc` and `actool` (the icon compiler)
-
-## Testing with short timers
-
-These flags override the saved settings for one run:
-
-```sh
-./Sway.app/Contents/MacOS/Sway --interval-seconds 10 --break-seconds 20 --warn-seconds 5
-```
