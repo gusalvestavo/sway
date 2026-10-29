@@ -1,0 +1,24 @@
+{
+  "fill" : {
+    "automatic-gradient" : "srgb:0.91000,0.93700,0.90600,1.00000"
+  },
+  "groups" : [
+    {
+      "layers" : [
+        { "image-name" : "arc.svg", "name" : "arc", "glass" : true }
+      ],
+      "shadow" : { "kind" : "neutral", "opacity" : 0.5 },
+      "translucency" : { "enabled" : true, "value" : 0.4 }
+    },
+    {
+      "layers" : [
+        { "image-name" : "inner.svg", "name" : "inner", "glass" : false }
+      ],
+      "shadow" : { "kind" : "neutral", "opacity" : 0.3 },
+      "translucency" : { "enabled" : true, "value" : 0.5 }
+    }
+  ],
+  "supported-platforms" : {
+    "squares" : "shared"
+  }
+}

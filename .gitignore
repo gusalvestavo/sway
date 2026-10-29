@@ -1,0 +1,5 @@
+# Build output from build.sh
+Sway.app/
+
+# macOS
+.DS_Store
