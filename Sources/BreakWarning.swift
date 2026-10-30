@@ -19,11 +19,7 @@ final class BreakWarning: NSObject {
     override init() {
         super.init()
 
-        let mark = NSImage(size: NSSize(width: 28, height: 28), flipped: false) { rect in
-            SwayMark.draw(in: rect.insetBy(dx: 1, dy: 1), lineScale: 1.3)
-            return true
-        }
-        let icon = NSImageView(image: mark)
+        let icon = MascotView(.getReady, height: 44)
 
         titleLabel.font = .systemFont(ofSize: 13, weight: .semibold)
         let subtitle = NSTextField(labelWithString: L("Start wrapping up what you're doing."))

@@ -65,3 +65,26 @@
 "Language" = "언어";
 "Same as the system" = "시스템과 동일";
 "Pause after how many minutes away?" = "몇 분 동안 자리를 비우면 일시정지할까요?";
+
+/* Brand */
+"Find your flow." = "나만의 흐름을 찾으세요.";
+
+/* New-day greeting */
+"Good morning, %@!" = "좋은 아침이에요, %@님!";
+"Good afternoon, %@!" = "좋은 오후예요, %@님!";
+"Good evening, %@!" = "좋은 저녁이에요, %@님!";
+"Good morning!" = "좋은 아침이에요!";
+"Good afternoon!" = "좋은 오후예요!";
+"Good evening!" = "좋은 저녁이에요!";
+"Your countdown has started: next break in %@." = "카운트다운이 시작됐어요: 다음 휴식까지 %@.";
+"Let's go!" = "시작해요!";
+"A brand-new day. Let's make it a great one!" = "완전히 새로운 하루예요. 멋진 날로 만들어 봐요!";
+"Fresh start, fresh ideas. You've got this!" = "새로운 시작, 새로운 아이디어. 할 수 있어요!";
+"Today is full of possibilities. Go get them!" = "오늘은 가능성으로 가득해요. 잡으러 가요!";
+"Small steps add up. Let's take the first one!" = "작은 걸음이 모여요. 첫걸음을 내디뎌 봐요!";
+"You showed up, and that's the hardest part. Let's go!" = "여기 온 것이 가장 어려운 일이었어요. 시작해요!";
+"Big things are built one focused hour at a time." = "큰일도 집중한 한 시간씩 쌓아 만들어져요.";
+"New day, new energy. Let's do something amazing!" = "새로운 날, 새로운 에너지. 멋진 일을 해 봐요!";
+"You're capable of more than you think. Show today!" = "생각보다 훨씬 더 잘할 수 있어요. 오늘 보여 줘요!";
+"Today's a great day to make progress. Ready, set, go!" = "오늘은 앞으로 나아가기 좋은 날이에요. 준비, 시작!";
+"Your best work is still ahead of you. Let's start!" = "최고의 작업은 아직 오지 않았어요. 시작해 봐요!";

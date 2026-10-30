@@ -65,3 +65,26 @@
 "Language" = "Langue";
 "Same as the system" = "Comme le système";
 "Pause after how many minutes away?" = "Mettre en pause après combien de minutes d’absence ?";
+
+/* Brand */
+"Find your flow." = "Trouvez votre rythme.";
+
+/* New-day greeting */
+"Good morning, %@!" = "Bonjour, %@ !";
+"Good afternoon, %@!" = "Bon après-midi, %@ !";
+"Good evening, %@!" = "Bonsoir, %@ !";
+"Good morning!" = "Bonjour !";
+"Good afternoon!" = "Bon après-midi !";
+"Good evening!" = "Bonsoir !";
+"Your countdown has started: next break in %@." = "Le compte à rebours a commencé : prochaine pause dans %@.";
+"Let's go!" = "C’est parti !";
+"A brand-new day. Let's make it a great one!" = "Une toute nouvelle journée. Faisons-en une belle journée !";
+"Fresh start, fresh ideas. You've got this!" = "Nouveau départ, nouvelles idées. Vous allez y arriver !";
+"Today is full of possibilities. Go get them!" = "Aujourd’hui regorge de possibilités. Allez les saisir !";
+"Small steps add up. Let's take the first one!" = "Les petits pas s’additionnent. Faisons le premier !";
+"You showed up, and that's the hardest part. Let's go!" = "Vous êtes là, et c’est le plus difficile. C’est parti !";
+"Big things are built one focused hour at a time." = "Les grandes choses se construisent une heure de concentration à la fois.";
+"New day, new energy. Let's do something amazing!" = "Nouveau jour, nouvelle énergie. Faisons quelque chose d’incroyable !";
+"You're capable of more than you think. Show today!" = "Vous êtes capable de plus que vous ne le pensez. Montrez-le aujourd’hui !";
+"Today's a great day to make progress. Ready, set, go!" = "Aujourd’hui est un excellent jour pour avancer. À vos marques, prêts, partez !";
+"Your best work is still ahead of you. Let's start!" = "Votre meilleur travail est encore devant vous. Commençons !";

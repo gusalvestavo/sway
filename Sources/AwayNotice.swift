@@ -16,11 +16,7 @@ final class AwayNotice: NSObject {
     override init() {
         super.init()
 
-        let mark = NSImage(size: NSSize(width: 28, height: 28), flipped: false) { rect in
-            SwayMark.draw(in: rect.insetBy(dx: 1, dy: 1), lineScale: 1.3)
-            return true
-        }
-        let icon = NSImageView(image: mark)
+        let icon = MascotView(.happy, height: 44)
 
         titleLabel.font = .systemFont(ofSize: 13, weight: .semibold)
         subtitleLabel.font = .systemFont(ofSize: 11)

@@ -65,3 +65,26 @@
 "Language" = "言語";
 "Same as the system" = "システムと同じ";
 "Pause after how many minutes away?" = "何分離席したら一時停止しますか？";
+
+/* Brand */
+"Find your flow." = "自分のペースで。";
+
+/* New-day greeting */
+"Good morning, %@!" = "おはようございます、%@さん！";
+"Good afternoon, %@!" = "こんにちは、%@さん！";
+"Good evening, %@!" = "こんばんは、%@さん！";
+"Good morning!" = "おはようございます！";
+"Good afternoon!" = "こんにちは！";
+"Good evening!" = "こんばんは！";
+"Your countdown has started: next break in %@." = "カウントダウンを開始しました：次の休憩まで%@。";
+"Let's go!" = "はじめよう！";
+"A brand-new day. Let's make it a great one!" = "まっさらな新しい一日。最高の日にしよう！";
+"Fresh start, fresh ideas. You've got this!" = "新しいスタート、新しいアイデア。きっとできる！";
+"Today is full of possibilities. Go get them!" = "今日は可能性でいっぱい。つかみに行こう！";
+"Small steps add up. Let's take the first one!" = "小さな一歩の積み重ね。まずは最初の一歩から！";
+"You showed up, and that's the hardest part. Let's go!" = "ここに来たことがいちばん大変なこと。さあ、はじめよう！";
+"Big things are built one focused hour at a time." = "大きなことも、集中した1時間の積み重ねから。";
+"New day, new energy. Let's do something amazing!" = "新しい日、新しいエネルギー。すごいことをしよう！";
+"You're capable of more than you think. Show today!" = "あなたは思っている以上にできる。今日それを見せよう！";
+"Today's a great day to make progress. Ready, set, go!" = "今日は前に進むのにぴったりの日。よーい、どん！";
+"Your best work is still ahead of you. Let's start!" = "最高の仕事はまだこれから。さあ、始めよう！";

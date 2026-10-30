@@ -4,6 +4,8 @@ struct HeaderState: Equatable {
     var caption: String
     var value: String
     var showsAddTime: Bool
+    /// The cat on the right, matching the state.
+    var mascot: Mascot
 }
 
 /// Top section of the menu: the current state in large type, plus buttons to add time.
@@ -16,6 +18,7 @@ final class MenuHeaderView: NSView {
     private let value = RollingTextView(font: .monospacedDigitSystemFont(ofSize: 34, weight: .light))
     private let addRow: NSStackView
     private let stack = NSStackView()
+    private let mascot = MascotView(.focus, height: 64)
     private let width: CGFloat = 250
 
     init(state: HeaderState) {
@@ -49,10 +52,13 @@ final class MenuHeaderView: NSView {
         stack.edgeInsets = NSEdgeInsets(top: 8, left: 14, bottom: 10, right: 14)
         stack.translatesAutoresizingMaskIntoConstraints = false
         addSubview(stack)
+        addSubview(mascot)
         NSLayoutConstraint.activate([
             stack.leadingAnchor.constraint(equalTo: leadingAnchor),
-            stack.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor),
+            stack.trailingAnchor.constraint(lessThanOrEqualTo: mascot.leadingAnchor, constant: -4),
             stack.topAnchor.constraint(equalTo: topAnchor),
+            mascot.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -14),
+            mascot.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8),
         ])
 
         update(state, animated: false)
@@ -63,10 +69,13 @@ final class MenuHeaderView: NSView {
     func update(_ state: HeaderState, animated: Bool) {
         caption.stringValue = state.caption
         value.setText(state.value, animated: animated)
+        mascot.pose = state.mascot
         let hiddenChanged = addRow.isHidden == state.showsAddTime
         addRow.isHidden = !state.showsAddTime
         if hiddenChanged || frame.height == 0 {
-            setFrameSize(NSSize(width: max(frame.width, width), height: stack.fittingSize.height))
+            // Room for the text plus the cat beside it.
+            let needed = stack.fittingSize.width + mascot.fittingSize.width + 18
+            setFrameSize(NSSize(width: max(frame.width, width, needed), height: stack.fittingSize.height))
         }
     }
 

@@ -70,10 +70,14 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         grid.row(at: 5).topPadding = 14
 
         let container = NSView()
+        let header = brandHeader()
         grid.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(header)
         container.addSubview(grid)
         NSLayoutConstraint.activate([
-            grid.topAnchor.constraint(equalTo: container.topAnchor, constant: 24),
+            header.topAnchor.constraint(equalTo: container.topAnchor, constant: 20),
+            header.centerXAnchor.constraint(equalTo: container.centerXAnchor),
+            grid.topAnchor.constraint(equalTo: header.bottomAnchor, constant: 24),
             grid.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -24),
             grid.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 32),
             grid.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -32),
@@ -83,6 +87,28 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
     }
 
     // MARK: Controls
+
+    /// The cat with the app's name and tagline, above the settings.
+    private func brandHeader() -> NSView {
+        let name = NSTextField(labelWithString: "Sway")
+        name.font = .systemFont(ofSize: 26, weight: .semibold)
+        // Sage reads too dark on a dark window, so dark mode uses the lighter leaf green.
+        name.textColor = NSColor(name: nil) { appearance in
+            appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua ? SwayMark.leaf : SwayMark.sage
+        }
+        let tagline = NSTextField(labelWithString: L("Find your flow."))
+        tagline.font = .systemFont(ofSize: 13)
+        tagline.textColor = .secondaryLabelColor
+        let text = NSStackView(views: [name, tagline])
+        text.orientation = .vertical
+        text.alignment = .leading
+        text.spacing = 0
+
+        let header = NSStackView(views: [MascotView(.sitting, height: 76), text])
+        header.spacing = 14
+        header.translatesAutoresizingMaskIntoConstraints = false
+        return header
+    }
 
     private func label(_ text: String) -> NSTextField {
         NSTextField(labelWithString: text.isEmpty ? "" : text + ":")

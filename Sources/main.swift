@@ -27,6 +27,12 @@ enum Settings {
         set { defaults.set(newValue, forKey: "idleSeconds") }
     }
 
+    /// When you last used the Mac, so a launch the next morning still greets you.
+    static var lastActive: Date? {
+        get { defaults.object(forKey: "lastActive") as? Date }
+        set { defaults.set(newValue, forKey: "lastActive") }
+    }
+
     /// The app's language as an .lproj code; nil follows the Mac's language.
     static var language: String? {
         get { defaults.string(forKey: "language") }
@@ -65,6 +71,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var warning = BreakWarning()
     private let settings = SettingsWindow()
     private let awayNotice = AwayNotice()
+    private let greeting = Greeting()
     private var timer: Timer?
     private var phase: Phase = .working
     private var deadline = Date()
@@ -78,6 +85,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     /// The Mac slept or the screen locked since you last came back, which counts as a break.
     private var sleptOrLocked = false
     private var warnedThisCycle = false
+    /// Your last input, for noticing the first return of a new day.
+    private var lastActive = Settings.lastActive ?? Date()
     /// The menu's header while the menu is open, so ticks can keep it live.
     private weak var header: MenuHeaderView?
 
@@ -145,6 +154,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     private func startBreak() {
         warning.close()
+        greeting.close()
         phase = .onBreak
         deadline = Date().addingTimeInterval(TimeInterval(breakSeconds))
         overlay.show(duration: TimeInterval(breakSeconds))
@@ -152,9 +162,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     private func tick() {
+        let idle = secondsSinceLastInput()
+        // Input behind the lock screen (typing the password) isn't a return yet.
+        if !screenLocked {
+            if idle < 2, greetIfNewDay() { return }
+            noteActivity(at: Date().addingTimeInterval(-idle))
+        }
         switch phase {
         case .working:
-            let idle = secondsSinceLastInput()
             if idleSeconds > 0, idle >= TimeInterval(idleSeconds) {
                 goAway(idle: idle)
                 return
@@ -185,10 +200,36 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             }
         case .away:
             // Behind the lock screen the notice would go unseen, so wait for the unlock.
-            if !screenLocked, secondsSinceLastInput() < 2 { comeBack() }
+            if !screenLocked, idle < 2 { comeBack() }
         case .breakOver, .paused:
             break
         }
+    }
+
+    private func noteActivity(at date: Date) {
+        guard date > lastActive else { return }
+        // Saving once a minute is precise enough for telling days apart.
+        let save = date.timeIntervalSince(Settings.lastActive ?? .distantPast) >= 60
+        lastActive = date
+        if save { Settings.lastActive = date }
+    }
+
+    /// The first return on a new day greets you and starts a fresh countdown, whatever state
+    /// the timer was left in. Days roll over at 4 AM, so working past midnight doesn't count.
+    private func greetIfNewDay() -> Bool {
+        let now = Date()
+        let rollover: TimeInterval = 4 * 3600
+        guard !Calendar.current.isDate(lastActive.addingTimeInterval(-rollover),
+                                       inSameDayAs: now.addingTimeInterval(-rollover)),
+              now.timeIntervalSince(lastActive) >= 3600 else { return false }
+        lastActive = now
+        Settings.lastActive = now
+        sleptOrLocked = false
+        startWork()
+        if let button = statusItem.button {
+            greeting.show(relativeTo: button, nextBreak: SettingsWindow.format(workSeconds))
+        }
+        return true
     }
 
     /// Freezes the countdown at the moment of your last input, so idle time isn't counted as work.
@@ -205,6 +246,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     /// Picks the countdown back up where it stopped and says how long you were gone.
     /// If the Mac slept or locked meanwhile, that counts as a break and a new cycle starts.
     private func comeBack() {
+        if greetIfNewDay() { return }
         let away = Date().timeIntervalSince(awaySince)
         let countedAsBreak = sleptOrLocked
         sleptOrLocked = false
@@ -222,7 +264,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
     }
 
-    @objc private func willSleep() { sleptOrLocked = true }
+    @objc private func willSleep() {
+        sleptOrLocked = true
+        Settings.lastActive = lastActive
+    }
+
+    func applicationWillTerminate(_ notification: Notification) {
+        Settings.lastActive = lastActive
+    }
 
     @objc private func screenDidLock() {
         screenLocked = true
@@ -240,6 +289,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     private func userReturned() {
+        if greetIfNewDay() { return }
         switch phase {
         case .working: startWork()
         case .away: comeBack()
@@ -270,15 +320,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var headerState: HeaderState {
         switch phase {
         case .working:
-            HeaderState(caption: L("Next break in"), value: clock(remainingSeconds), showsAddTime: true)
+            HeaderState(caption: L("Next break in"), value: clock(remainingSeconds), showsAddTime: true, mascot: .focus)
         case .onBreak:
-            HeaderState(caption: L("On a break"), value: clock(remainingSeconds), showsAddTime: false)
+            HeaderState(caption: L("On a break"), value: clock(remainingSeconds), showsAddTime: false, mascot: .stretching)
         case .breakOver:
-            HeaderState(caption: L("Break's over"), value: L("Welcome back"), showsAddTime: false)
+            HeaderState(caption: L("Break's over"), value: L("Welcome back"), showsAddTime: false, mascot: .cheering)
         case .paused:
-            HeaderState(caption: L("%@ left", clock(Int(pausedRemaining))), value: L("Paused"), showsAddTime: true)
+            HeaderState(caption: L("%@ left", clock(Int(pausedRemaining))), value: L("Paused"), showsAddTime: true, mascot: .sleeping)
         case .away:
-            HeaderState(caption: L("%@ left", clock(Int(pausedRemaining))), value: L("Away"), showsAddTime: true)
+            HeaderState(caption: L("%@ left", clock(Int(pausedRemaining))), value: L("Away"), showsAddTime: true, mascot: .relaxed)
         }
     }
 

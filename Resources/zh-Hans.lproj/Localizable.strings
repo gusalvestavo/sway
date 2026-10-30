@@ -65,3 +65,26 @@
 "Language" = "语言";
 "Same as the system" = "跟随系统";
 "Pause after how many minutes away?" = "离开多少分钟后暂停？";
+
+/* Brand */
+"Find your flow." = "找到你的节奏。";
+
+/* New-day greeting */
+"Good morning, %@!" = "早上好，%@！";
+"Good afternoon, %@!" = "下午好，%@！";
+"Good evening, %@!" = "晚上好，%@！";
+"Good morning!" = "早上好！";
+"Good afternoon!" = "下午好！";
+"Good evening!" = "晚上好！";
+"Your countdown has started: next break in %@." = "倒计时已开始：距离下次休息还有 %@。";
+"Let's go!" = "出发吧！";
+"A brand-new day. Let's make it a great one!" = "崭新的一天。让我们把它过得精彩！";
+"Fresh start, fresh ideas. You've got this!" = "新的开始，新的想法。你一定行！";
+"Today is full of possibilities. Go get them!" = "今天充满了可能性。去抓住它们！";
+"Small steps add up. Let's take the first one!" = "小小的步伐会积少成多。迈出第一步吧！";
+"You showed up, and that's the hardest part. Let's go!" = "你来了，这已经是最难的部分。出发吧！";
+"Big things are built one focused hour at a time." = "伟大的事情，是一小时一小时专注积累出来的。";
+"New day, new energy. Let's do something amazing!" = "新的一天，新的能量。一起做点了不起的事吧！";
+"You're capable of more than you think. Show today!" = "你比自己想象的更有能力。今天就证明给自己看！";
+"Today's a great day to make progress. Ready, set, go!" = "今天是取得进展的好日子。预备，开始！";
+"Your best work is still ahead of you. Let's start!" = "你最好的作品还在前方。开始吧！";

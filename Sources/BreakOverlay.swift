@@ -173,6 +173,8 @@ private class BackdropView: NSView {
 private final class OverlayPanel: BackdropView {
     private static let contentWidth: CGFloat = 560
     private let ring = LogoProgressView()
+    /// The cat sits on the card's top edge: stretching during the break, cheering once it's over.
+    private let mascot = MascotView(.stretching, height: 110)
     private let timeLabel = NSTextField(labelWithString: "")
     private let titleLabel = NSTextField(labelWithString: "")
     private let messageLabel: NSTextField
@@ -229,6 +231,7 @@ private final class OverlayPanel: BackdropView {
         let content = Glass.card(stack, cornerRadius: 40, padding: 48)
         content.translatesAutoresizingMaskIntoConstraints = false
         addSubview(content)
+        addSubview(mascot)
 
         ring.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -244,6 +247,8 @@ private final class OverlayPanel: BackdropView {
             content.centerXAnchor.constraint(equalTo: centerXAnchor),
             content.centerYAnchor.constraint(equalTo: centerYAnchor),
             content.leadingAnchor.constraint(greaterThanOrEqualTo: leadingAnchor, constant: 40),
+            mascot.centerXAnchor.constraint(equalTo: content.centerXAnchor),
+            mascot.bottomAnchor.constraint(equalTo: content.topAnchor, constant: 10),
         ])
 
         if Date() < skipUnlocksAt {
@@ -263,6 +268,7 @@ private final class OverlayPanel: BackdropView {
         let seconds = Int(remaining.rounded(.up))
         timeLabel.stringValue = finished ? "✓" : String(format: "%d:%02d", seconds / 60, seconds % 60)
         titleLabel.stringValue = finished ? L("Break's over") : L("Time for a break")
+        mascot.pose = finished ? .cheering : .stretching
         snoozeRow.isHidden = finished
         lockButton.isHidden = finished
         waitTick()

@@ -65,3 +65,26 @@
 "Language" = "Idioma";
 "Same as the system" = "Igual ao do sistema";
 "Pause after how many minutes away?" = "Pausar após quantos minutos de ausência?";
+
+/* Brand */
+"Find your flow." = "Encontre seu ritmo.";
+
+/* New-day greeting */
+"Good morning, %@!" = "Bom dia, %@!";
+"Good afternoon, %@!" = "Boa tarde, %@!";
+"Good evening, %@!" = "Boa noite, %@!";
+"Good morning!" = "Bom dia!";
+"Good afternoon!" = "Boa tarde!";
+"Good evening!" = "Boa noite!";
+"Your countdown has started: next break in %@." = "A contagem começou: próximo intervalo em %@.";
+"Let's go!" = "Vamos lá!";
+"A brand-new day. Let's make it a great one!" = "Um dia novinho em folha. Vamos fazer dele um ótimo dia!";
+"Fresh start, fresh ideas. You've got this!" = "Recomeço, ideias novas. Você consegue!";
+"Today is full of possibilities. Go get them!" = "Hoje está cheio de possibilidades. Vá atrás delas!";
+"Small steps add up. Let's take the first one!" = "Pequenos passos somam. Vamos dar o primeiro!";
+"You showed up, and that's the hardest part. Let's go!" = "Você apareceu, e essa é a parte mais difícil. Vamos lá!";
+"Big things are built one focused hour at a time." = "Grandes coisas se constroem uma hora de foco por vez.";
+"New day, new energy. Let's do something amazing!" = "Dia novo, energia nova. Vamos fazer algo incrível!";
+"You're capable of more than you think. Show today!" = "Você é capaz de mais do que imagina. Mostre isso hoje!";
+"Today's a great day to make progress. Ready, set, go!" = "Hoje é um ótimo dia para avançar. Preparar, apontar, já!";
+"Your best work is still ahead of you. Let's start!" = "Seu melhor trabalho ainda está por vir. Vamos começar!";
