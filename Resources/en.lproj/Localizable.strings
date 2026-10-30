@@ -50,3 +50,9 @@
 "Off" = "Off";
 "%d sec" = "%d sec";
 "%d min" = "%d min";
+
+/* Away from the computer */
+"Away" = "Away";
+"You were away for %@" = "You were away for %@";
+"The countdown waited for you." = "The countdown waited for you.";
+"That counts as a break, so the timer started over." = "That counts as a break, so the timer started over.";

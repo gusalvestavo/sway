@@ -34,20 +34,37 @@ func argument(_ name: String) -> Int? {
 let intervalOverride = argument("--interval-seconds")
 let breakOverride = argument("--break-seconds")
 let warnOverride = argument("--warn-seconds")
+let idleOverride = argument("--idle-seconds")
+
+/// Seconds since the last keyboard, mouse or trackpad event in this login session.
+/// Needs no permission, unlike watching the events themselves.
+func secondsSinceLastInput() -> TimeInterval {
+    CGEventSource.secondsSinceLastEventType(.combinedSessionState, eventType: CGEventType(rawValue: ~0)!)
+}
 
 // MARK: - App
 
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
-    enum Phase { case working, onBreak, breakOver, paused }
+    /// `away`: no input for a while, so the work countdown is frozen until you're back.
+    enum Phase { case working, onBreak, breakOver, paused, away }
 
     private let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
     private let overlay = BreakOverlay()
     private let warning = BreakWarning()
+    private let awayNotice = AwayNotice()
     private var timer: Timer?
     private var phase: Phase = .working
     private var deadline = Date()
+    /// Time left on the countdown while paused or away.
     private var pausedRemaining: TimeInterval = 0
+    /// When the last input happened before going away.
+    private var awaySince = Date()
+    /// When the current work countdown started (or resumed).
+    private var cycleStart = Date()
+    private var screenLocked = false
+    /// The Mac slept or the screen locked since you last came back, which counts as a break.
+    private var sleptOrLocked = false
     private var warnedThisCycle = false
     /// The menu's header while the menu is open, so ticks can keep it live.
     private weak var header: MenuHeaderView?
@@ -55,6 +72,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var workSeconds: Int { intervalOverride ?? Settings.workSeconds }
     private var breakSeconds: Int { breakOverride ?? Settings.breakSeconds }
     private var warnSeconds: Int { warnOverride ?? Settings.warnSeconds }
+    /// No input for this long freezes the countdown.
+    private var idleSeconds: Int { idleOverride ?? 5 * 60 }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         overlay.onEnd = { [unowned self] in startWork() }
@@ -75,10 +94,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         // After sleep or a locked screen you were most likely away, so that counts as a break.
         let ws = NSWorkspace.shared.notificationCenter
-        ws.addObserver(self, selector: #selector(userReturned), name: NSWorkspace.didWakeNotification, object: nil)
-        DistributedNotificationCenter.default().addObserver(
-            self, selector: #selector(userReturned),
-            name: NSNotification.Name("com.apple.screenIsUnlocked"), object: nil)
+        ws.addObserver(self, selector: #selector(willSleep), name: NSWorkspace.willSleepNotification, object: nil)
+        ws.addObserver(self, selector: #selector(didWake), name: NSWorkspace.didWakeNotification, object: nil)
+        let distributed = DistributedNotificationCenter.default()
+        distributed.addObserver(self, selector: #selector(screenDidLock),
+                                name: NSNotification.Name("com.apple.screenIsLocked"), object: nil)
+        distributed.addObserver(self, selector: #selector(screenDidUnlock),
+                                name: NSNotification.Name("com.apple.screenIsUnlocked"), object: nil)
     }
 
     // MARK: Timer
@@ -86,8 +108,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private func startWork(after seconds: Int? = nil) {
         overlay.close()
         warning.close()
+        awayNotice.close()
         phase = .working
         let cycle = seconds ?? workSeconds
+        cycleStart = Date()
         deadline = Date().addingTimeInterval(TimeInterval(cycle))
         // A cycle shorter than the warning window (e.g. a 1-minute postpone) gets no warning.
         warnedThisCycle = cycle <= warnSeconds
@@ -105,6 +129,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private func tick() {
         switch phase {
         case .working:
+            let idle = secondsSinceLastInput()
+            if idle >= TimeInterval(idleSeconds) {
+                goAway(idle: idle)
+                return
+            }
             let remaining = deadline.timeIntervalSinceNow
             if remaining <= 0 {
                 startBreak()
@@ -129,13 +158,69 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 overlay.update(remaining: remaining)
                 updateDisplay()
             }
+        case .away:
+            // Behind the lock screen the notice would go unseen, so wait for the unlock.
+            if !screenLocked, secondsSinceLastInput() < 2 { comeBack() }
         case .breakOver, .paused:
             break
         }
     }
 
-    @objc private func userReturned() {
-        if phase == .working { startWork() }
+    /// Freezes the countdown at the moment of your last input, so idle time isn't counted as work.
+    private func goAway(idle: TimeInterval) {
+        // Idle time from before this countdown started doesn't belong to it.
+        let idle = min(idle, Date().timeIntervalSince(cycleStart))
+        warning.close()
+        awaySince = Date().addingTimeInterval(-idle)
+        pausedRemaining = max(1, deadline.timeIntervalSinceNow + idle)
+        phase = .away
+        updateDisplay()
+    }
+
+    /// Picks the countdown back up where it stopped and says how long you were gone.
+    /// If the Mac slept or locked meanwhile, that counts as a break and a new cycle starts.
+    private func comeBack() {
+        let away = Date().timeIntervalSince(awaySince)
+        let countedAsBreak = sleptOrLocked
+        sleptOrLocked = false
+        if countedAsBreak {
+            startWork()
+        } else {
+            phase = .working
+            cycleStart = Date()
+            deadline = Date().addingTimeInterval(pausedRemaining)
+            warnedThisCycle = pausedRemaining <= TimeInterval(warnSeconds)
+            updateDisplay()
+        }
+        if let button = statusItem.button {
+            awayNotice.show(relativeTo: button, away: away, countedAsBreak: countedAsBreak)
+        }
+    }
+
+    @objc private func willSleep() { sleptOrLocked = true }
+
+    @objc private func screenDidLock() {
+        screenLocked = true
+        sleptOrLocked = true
+    }
+
+    @objc private func didWake() {
+        // With a password on wake, the unlock is the real return.
+        if !screenLocked { userReturned() }
+    }
+
+    @objc private func screenDidUnlock() {
+        screenLocked = false
+        userReturned()
+    }
+
+    private func userReturned() {
+        switch phase {
+        case .working: startWork()
+        case .away: comeBack()
+        case .onBreak, .breakOver, .paused: break
+        }
+        sleptOrLocked = false
     }
 
     // MARK: Menu
@@ -149,9 +234,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         case .onBreak: title = L("Break %@", short(remainingSeconds))
         case .breakOver: title = L("Break done")
         case .paused: title = L("Paused %@", short(Int(pausedRemaining)))
+        case .away: title = short(Int(pausedRemaining))
         }
         statusItem.button?.title = " " + title
-        let image = phase == .paused ? SwayMark.pausedMenuBarImage : SwayMark.menuBarImage
+        let image = phase == .paused || phase == .away ? SwayMark.pausedMenuBarImage : SwayMark.menuBarImage
         if statusItem.button?.image !== image { statusItem.button?.image = image }
         header?.update(headerState, animated: true)
     }
@@ -166,6 +252,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             HeaderState(caption: L("Break's over"), value: L("Welcome back"), showsAddTime: false)
         case .paused:
             HeaderState(caption: L("%@ left", clock(Int(pausedRemaining))), value: L("Paused"), showsAddTime: true)
+        case .away:
+            HeaderState(caption: L("%@ left", clock(Int(pausedRemaining))), value: L("Away"), showsAddTime: true)
         }
     }
 
@@ -183,7 +271,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         switch phase {
         case .onBreak: menu.addItem(item(L("End break now"), #selector(endBreak)))
         case .breakOver: menu.addItem(item(L("Back to work"), #selector(endBreak)))
-        case .working, .paused: menu.addItem(item(L("Take a break now"), #selector(breakNow)))
+        case .working, .paused, .away: menu.addItem(item(L("Take a break now"), #selector(breakNow)))
         }
         menu.addItem(item(phase == .paused ? L("Resume") : L("Pause"), #selector(togglePause)))
         menu.addItem(item(L("Restart timer"), #selector(restart)))
@@ -198,8 +286,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.addItem(submenu(title: L("Warn me before breaks"), options: [0, 30, 60, 120, 300],
                              current: Settings.warnSeconds, action: #selector(setWarn(_:)),
                              customAction: #selector(customWarn)))
-        if intervalOverride != nil || breakOverride != nil || warnOverride != nil {
-            let note = NSMenuItem(title: "Test mode: \(workSeconds)s work, \(breakSeconds)s break, \(warnSeconds)s warning",
+        if intervalOverride != nil || breakOverride != nil || warnOverride != nil || idleOverride != nil {
+            let note = NSMenuItem(title: "Test mode: \(workSeconds)s work, \(breakSeconds)s break, \(warnSeconds)s warning, \(idleSeconds)s idle",
                                   action: nil, keyEquivalent: "")
             note.isEnabled = false
             menu.addItem(note)
@@ -254,7 +342,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 warnedThisCycle = false
                 warning.close()
             }
-        case .paused:
+        case .paused, .away:
             pausedRemaining += extra
         case .onBreak, .breakOver:
             return
@@ -271,7 +359,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @objc private func togglePause() {
         if phase == .paused {
             phase = .working
+            cycleStart = Date()
             deadline = Date().addingTimeInterval(pausedRemaining)
+        } else if phase == .away {
+            // Already frozen; just stop it from resuming on its own.
+            phase = .paused
         } else {
             warning.close()
             pausedRemaining = max(0, deadline.timeIntervalSinceNow)

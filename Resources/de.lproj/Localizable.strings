@@ -50,3 +50,9 @@
 "Off" = "Aus";
 "%d sec" = "%d Sek.";
 "%d min" = "%d Min.";
+
+/* Away from the computer */
+"Away" = "Abwesend";
+"You were away for %@" = "Du warst %@ weg";
+"The countdown waited for you." = "Der Countdown hat auf dich gewartet.";
+"That counts as a break, so the timer started over." = "Das zählt als Pause, deshalb startet der Timer neu.";

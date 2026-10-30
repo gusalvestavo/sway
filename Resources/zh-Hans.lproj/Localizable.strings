@@ -50,3 +50,9 @@
 "Off" = "关闭";
 "%d sec" = "%d 秒";
 "%d min" = "%d 分钟";
+
+/* Away from the computer */
+"Away" = "离开";
+"You were away for %@" = "你离开了 %@";
+"The countdown waited for you." = "倒计时一直在等你。";
+"That counts as a break, so the timer started over." = "这算作一次休息，计时器已重新开始。";

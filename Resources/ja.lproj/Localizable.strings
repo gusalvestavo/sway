@@ -50,3 +50,9 @@
 "Off" = "オフ";
 "%d sec" = "%d秒";
 "%d min" = "%d分";
+
+/* Away from the computer */
+"Away" = "離席中";
+"You were away for %@" = "%@離席していました";
+"The countdown waited for you." = "カウントダウンは止まっていました。";
+"That counts as a break, so the timer started over." = "休憩とみなして、タイマーをリセットしました。";

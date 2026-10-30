@@ -50,3 +50,9 @@
 "Off" = "끔";
 "%d sec" = "%d초";
 "%d min" = "%d분";
+
+/* Away from the computer */
+"Away" = "자리 비움";
+"You were away for %@" = "%@ 동안 자리를 비웠어요";
+"The countdown waited for you." = "카운트다운이 기다리고 있었어요.";
+"That counts as a break, so the timer started over." = "휴식으로 간주되어 타이머가 다시 시작됐어요.";
