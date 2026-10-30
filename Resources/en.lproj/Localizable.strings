@@ -56,3 +56,12 @@
 "You were away for %@" = "You were away for %@";
 "The countdown waited for you." = "The countdown waited for you.";
 "That counts as a break, so the timer started over." = "That counts as a break, so the timer started over.";
+
+/* Settings window */
+"Settings" = "Settings";
+"Settings…" = "Settings…";
+"Pause when away after" = "Pause when away after";
+"No keyboard, mouse or trackpad input for this long stops the countdown." = "No keyboard, mouse or trackpad input for this long stops the countdown.";
+"Language" = "Language";
+"Same as the system" = "Same as the system";
+"Pause after how many minutes away?" = "Pause after how many minutes away?";

@@ -56,3 +56,12 @@
 "You were away for %@" = "%@離席していました";
 "The countdown waited for you." = "カウントダウンは止まっていました。";
 "That counts as a break, so the timer started over." = "休憩とみなして、タイマーをリセットしました。";
+
+/* Settings window */
+"Settings" = "設定";
+"Settings…" = "設定…";
+"Pause when away after" = "離席とみなすまでの時間";
+"No keyboard, mouse or trackpad input for this long stops the countdown." = "この時間キーボード、マウス、トラックパッドの操作がないとカウントダウンが止まります。";
+"Language" = "言語";
+"Same as the system" = "システムと同じ";
+"Pause after how many minutes away?" = "何分離席したら一時停止しますか？";

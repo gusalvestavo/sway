@@ -25,10 +25,9 @@ Designed to encourage you to respect your time.
   - the primary display shows the Sway logo filling up as the break runs, a random calming message, snooze buttons (+1/+3/+5 min), *Skip break* (available after 5 seconds) and *Lock screen*;
   - other displays are just blurred.
 - **Liquid Glass** styling on macOS 26+, including a layered glass app icon; older systems get the standard look.
-- **Pauses while you're away**: after 5 minutes without keyboard or mouse input the countdown stops, and when you're back a popover says how long you were gone.
-- Configurable work interval and break length, saved between launches. Sleep or a locked screen counts as a break.
-- Optional *Launch at Login*.
-- Available in English, Português (Brasil), Español, Français, Deutsch, Italiano, 日本語, 한국어 and 简体中文, following your Mac's language.
+- **Pauses while you're away**: after 30 seconds without keyboard, mouse or trackpad input the countdown stops (adjustable or off), and when you're back a popover says how long you were gone.
+- **Work interval and break length** right in the menu, and a **Settings window** (gear icon in the menu) for the work interval, break length, heads-up, away detection, language and *Launch at Login*, all saved between launches. Sleep or a locked screen counts as a break.
+- Available in English, Português (Brasil), Español, Français, Deutsch, Italiano, 日本語, 한국어 and 简体中文, following your Mac's language or the one you pick in Settings.
 
 ## Requirements
 

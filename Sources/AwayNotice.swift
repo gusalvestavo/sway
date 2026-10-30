@@ -41,12 +41,15 @@ final class AwayNotice: NSObject {
         popover.animates = true
     }
 
-    /// `countedAsBreak` says the time away was long enough to start a fresh cycle.
+    /// `countedAsBreak` says the Mac slept or locked meanwhile, so a fresh cycle started.
     func show(relativeTo button: NSStatusBarButton, away: TimeInterval, countedAsBreak: Bool) {
         let formatter = DateComponentsFormatter()
-        formatter.allowedUnits = away >= 3600 ? [.hour, .minute] : [.minute]
+        formatter.allowedUnits = away >= 3600 ? [.hour, .minute] : away >= 60 ? [.minute] : [.second]
         formatter.unitsStyle = .full
-        let duration = formatter.string(from: max(60, away)) ?? ""
+        var calendar = Calendar.current
+        calendar.locale = appLocale
+        formatter.calendar = calendar
+        let duration = formatter.string(from: away) ?? ""
         titleLabel.stringValue = L("You were away for %@", duration)
         subtitleLabel.stringValue = countedAsBreak
             ? L("That counts as a break, so the timer started over.")

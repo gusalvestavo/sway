@@ -56,3 +56,12 @@
 "You were away for %@" = "你离开了 %@";
 "The countdown waited for you." = "倒计时一直在等你。";
 "That counts as a break, so the timer started over." = "这算作一次休息，计时器已重新开始。";
+
+/* Settings window */
+"Settings" = "设置";
+"Settings…" = "设置…";
+"Pause when away after" = "离开多久后暂停";
+"No keyboard, mouse or trackpad input for this long stops the countdown." = "在这段时间内没有键盘、鼠标或触控板操作，倒计时会停止。";
+"Language" = "语言";
+"Same as the system" = "跟随系统";
+"Pause after how many minutes away?" = "离开多少分钟后暂停？";

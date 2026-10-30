@@ -1,5 +1,4 @@
 import AppKit
-import ServiceManagement
 
 // MARK: - Settings
 
@@ -20,6 +19,18 @@ enum Settings {
     static var warnSeconds: Int {
         get { defaults.object(forKey: "warnSeconds") as? Int ?? 60 }
         set { defaults.set(newValue, forKey: "warnSeconds") }
+    }
+
+    /// How long without input before the countdown stops; 0 turns it off.
+    static var idleSeconds: Int {
+        get { defaults.object(forKey: "idleSeconds") as? Int ?? 30 }
+        set { defaults.set(newValue, forKey: "idleSeconds") }
+    }
+
+    /// The app's language as an .lproj code; nil follows the Mac's language.
+    static var language: String? {
+        get { defaults.string(forKey: "language") }
+        set { defaults.set(newValue, forKey: "language") }
     }
 }
 
@@ -51,7 +62,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     private let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
     private let overlay = BreakOverlay()
-    private let warning = BreakWarning()
+    private var warning = BreakWarning()
+    private let settings = SettingsWindow()
     private let awayNotice = AwayNotice()
     private var timer: Timer?
     private var phase: Phase = .working
@@ -72,14 +84,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var workSeconds: Int { intervalOverride ?? Settings.workSeconds }
     private var breakSeconds: Int { breakOverride ?? Settings.breakSeconds }
     private var warnSeconds: Int { warnOverride ?? Settings.warnSeconds }
-    /// No input for this long freezes the countdown.
-    private var idleSeconds: Int { idleOverride ?? 5 * 60 }
+    /// No input for this long freezes the countdown; 0 never does.
+    private var idleSeconds: Int { idleOverride ?? Settings.idleSeconds }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         overlay.onEnd = { [unowned self] in startWork() }
         overlay.onPostpone = { [unowned self] minutes in startWork(after: minutes * 60) }
-        warning.onStartNow = { [unowned self] in startBreak() }
-        warning.onSnooze = { [unowned self] minutes in addTime(minutes: minutes) }
+        connectWarning()
+        settings.onWorkChanged = { [unowned self] in startWork() }
+        settings.onChanged = { [unowned self] in updateDisplay() }
+        settings.onLanguageChanged = { [unowned self] in
+            // The popover's labels are built once, so rebuild it in the new language.
+            warning.close()
+            warning = BreakWarning()
+            connectWarning()
+            updateDisplay()
+        }
         statusItem.button?.imagePosition = .imageLeading
         let menu = NSMenu()
         menu.delegate = self
@@ -101,6 +121,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                                 name: NSNotification.Name("com.apple.screenIsLocked"), object: nil)
         distributed.addObserver(self, selector: #selector(screenDidUnlock),
                                 name: NSNotification.Name("com.apple.screenIsUnlocked"), object: nil)
+    }
+
+    private func connectWarning() {
+        warning.onStartNow = { [unowned self] in startBreak() }
+        warning.onSnooze = { [unowned self] minutes in addTime(minutes: minutes) }
     }
 
     // MARK: Timer
@@ -130,7 +155,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         switch phase {
         case .working:
             let idle = secondsSinceLastInput()
-            if idle >= TimeInterval(idleSeconds) {
+            if idleSeconds > 0, idle >= TimeInterval(idleSeconds) {
                 goAway(idle: idle)
                 return
             }
@@ -277,30 +302,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.addItem(item(L("Restart timer"), #selector(restart)))
         menu.addItem(.separator())
 
-        menu.addItem(submenu(title: L("Remind me every"), options: [20, 30, 45, 60, 90].map { $0 * 60 },
+        menu.addItem(submenu(title: L("Remind me every"), symbol: "timer", options: SettingsWindow.workPresets,
                              current: Settings.workSeconds, action: #selector(setWork(_:)),
                              customAction: #selector(customWork)))
-        menu.addItem(submenu(title: L("Break length"), options: [2, 5, 10, 15].map { $0 * 60 },
+        menu.addItem(submenu(title: L("Break length"), symbol: "cup.and.saucer", options: SettingsWindow.breakPresets,
                              current: Settings.breakSeconds, action: #selector(setBreak(_:)),
                              customAction: #selector(customBreak)))
-        menu.addItem(submenu(title: L("Warn me before breaks"), options: [0, 30, 60, 120, 300],
-                             current: Settings.warnSeconds, action: #selector(setWarn(_:)),
-                             customAction: #selector(customWarn)))
+        menu.addItem(.separator())
+
         if intervalOverride != nil || breakOverride != nil || warnOverride != nil || idleOverride != nil {
             let note = NSMenuItem(title: "Test mode: \(workSeconds)s work, \(breakSeconds)s break, \(warnSeconds)s warning, \(idleSeconds)s idle",
                                   action: nil, keyEquivalent: "")
             note.isEnabled = false
             menu.addItem(note)
         }
-
-        menu.addItem(.separator())
-        let login = item(L("Launch at Login"), #selector(toggleLaunchAtLogin))
-        switch SMAppService.mainApp.status {
-        case .enabled: login.state = .on
-        case .requiresApproval: login.state = .mixed
-        default: login.state = .off
-        }
-        menu.addItem(login)
+        let settingsItem = item(L("Settings…"), #selector(showSettingsWindow), key: ",")
+        settingsItem.attributedTitle = iconTitle(settingsItem.title, symbol: "gearshape")
+        menu.addItem(settingsItem)
         menu.addItem(item(L("Quit Sway"), #selector(quit), key: "q"))
     }
 
@@ -314,12 +332,37 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         return item
     }
 
-    private func submenu(title: String, options: [Int], current: Int,
+    /// Menu text with an SF Symbol in front. macOS 27 hides `NSMenuItem.image`, so the icon goes
+    /// in the title, padded to a fixed width so the text lines up across items.
+    private func iconTitle(_ text: String, symbol: String) -> NSAttributedString {
+        let font = NSFont.menuFont(ofSize: 0)
+        guard let icon = NSImage(systemSymbolName: symbol, accessibilityDescription: nil)?
+            .withSymbolConfiguration(.init(pointSize: font.pointSize - 1, weight: .regular)) else {
+            return NSAttributedString(string: text)
+        }
+        let attachment = NSTextAttachment()
+        attachment.image = icon
+        let size = icon.size
+        attachment.bounds = NSRect(x: 0, y: (font.capHeight - size.height) / 2, width: size.width, height: size.height)
+        // A blank image after the icon pads every icon to the same slot.
+        let blank = NSImage(size: NSSize(width: max(1, font.pointSize + 10 - size.width), height: 1))
+        let spacer = NSTextAttachment()
+        spacer.image = blank
+        spacer.bounds = NSRect(origin: .zero, size: blank.size)
+        let title = NSMutableAttributedString(attachment: attachment)
+        title.append(NSAttributedString(attachment: spacer))
+        title.append(NSAttributedString(string: text))
+        title.addAttribute(.font, value: font, range: NSRange(location: 0, length: title.length))
+        return title
+    }
+
+    private func submenu(title: String, symbol: String, options: [Int], current: Int,
                          action: Selector, customAction: Selector) -> NSMenuItem {
-        let parent = NSMenuItem(title: "\(title): \(format(current))", action: nil, keyEquivalent: "")
+        let parent = NSMenuItem(title: "\(title): \(SettingsWindow.format(current))", action: nil, keyEquivalent: "")
+        parent.attributedTitle = iconTitle(parent.title, symbol: symbol)
         let sub = NSMenu()
         for seconds in options {
-            let option = item(format(seconds), action)
+            let option = item(SettingsWindow.format(seconds), action)
             option.tag = seconds
             option.state = seconds == current ? .on : .off
             sub.addItem(option)
@@ -355,6 +398,52 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @objc private func endBreak() { startWork() }
     @objc private func restart() { startWork() }
     @objc private func quit() { NSApp.terminate(nil) }
+    // Not named like a standard settings action, which makes macOS 27 add a second gear.
+    @objc private func showSettingsWindow() { settings.show() }
+
+    @objc private func setWork(_ sender: NSMenuItem) {
+        Settings.workSeconds = sender.tag
+        settings.refresh()
+        startWork()
+    }
+
+    @objc private func setBreak(_ sender: NSMenuItem) {
+        Settings.breakSeconds = sender.tag
+        settings.refresh()
+        updateDisplay()
+    }
+
+    @objc private func customWork() {
+        if let minutes = askMinutes(L("Remind me every how many minutes?"), current: Settings.workSeconds / 60) {
+            Settings.workSeconds = minutes * 60
+            settings.refresh()
+            startWork()
+        }
+    }
+
+    @objc private func customBreak() {
+        if let minutes = askMinutes(L("Break length in minutes?"), current: Settings.breakSeconds / 60) {
+            Settings.breakSeconds = minutes * 60
+            settings.refresh()
+            updateDisplay()
+        }
+    }
+
+    private func askMinutes(_ question: String, current: Int) -> Int? {
+        NSApp.activate(ignoringOtherApps: true)
+        let alert = NSAlert()
+        alert.messageText = question
+        alert.addButton(withTitle: L("Save"))
+        alert.addButton(withTitle: L("Cancel"))
+        let field = NSTextField(frame: NSRect(x: 0, y: 0, width: 120, height: 24))
+        field.stringValue = String(current)
+        alert.accessoryView = field
+        alert.window.initialFirstResponder = field
+        guard alert.runModal() == .alertFirstButtonReturn,
+              let minutes = Int(field.stringValue.trimmingCharacters(in: .whitespaces)),
+              (1...600).contains(minutes) else { return nil }
+        return minutes
+    }
 
     @objc private func togglePause() {
         if phase == .paused {
@@ -376,80 +465,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         updateDisplay()
     }
 
-    @objc private func toggleLaunchAtLogin() {
-        let service = SMAppService.mainApp
-        do {
-            if service.status == .enabled {
-                try service.unregister()
-            } else {
-                try service.register()
-            }
-        } catch {
-            NSApp.activate(ignoringOtherApps: true)
-            let alert = NSAlert()
-            alert.messageText = L("Couldn't change Launch at Login")
-            alert.informativeText = error.localizedDescription + "\n\n" + L("Move Sway to your Applications folder and try again.")
-            alert.runModal()
-        }
-        // macOS may ask you to approve the login item in System Settings first.
-        if service.status == .requiresApproval {
-            SMAppService.openSystemSettingsLoginItems()
-        }
-        updateDisplay()
-    }
-
-    @objc private func setWork(_ sender: NSMenuItem) {
-        Settings.workSeconds = sender.tag
-        startWork()
-    }
-
-    @objc private func setBreak(_ sender: NSMenuItem) {
-        Settings.breakSeconds = sender.tag
-        updateDisplay()
-    }
-
-    @objc private func setWarn(_ sender: NSMenuItem) {
-        Settings.warnSeconds = sender.tag
-        updateDisplay()
-    }
-
-    @objc private func customWarn() {
-        if let minutes = askMinutes(L("Warn me how many minutes before a break?"), current: Settings.warnSeconds / 60) {
-            Settings.warnSeconds = minutes * 60
-            updateDisplay()
-        }
-    }
-
-    @objc private func customWork() {
-        if let minutes = askMinutes(L("Remind me every how many minutes?"), current: Settings.workSeconds / 60) {
-            Settings.workSeconds = minutes * 60
-            startWork()
-        }
-    }
-
-    @objc private func customBreak() {
-        if let minutes = askMinutes(L("Break length in minutes?"), current: Settings.breakSeconds / 60) {
-            Settings.breakSeconds = minutes * 60
-            updateDisplay()
-        }
-    }
-
-    private func askMinutes(_ question: String, current: Int) -> Int? {
-        NSApp.activate(ignoringOtherApps: true)
-        let alert = NSAlert()
-        alert.messageText = question
-        alert.addButton(withTitle: L("Save"))
-        alert.addButton(withTitle: L("Cancel"))
-        let field = NSTextField(frame: NSRect(x: 0, y: 0, width: 120, height: 24))
-        field.stringValue = String(current)
-        alert.accessoryView = field
-        alert.window.initialFirstResponder = field
-        guard alert.runModal() == .alertFirstButtonReturn,
-              let minutes = Int(field.stringValue.trimmingCharacters(in: .whitespaces)),
-              (1...600).contains(minutes) else { return nil }
-        return minutes
-    }
-
     // MARK: Formatting
 
     /// Countdown with seconds for the menu header, e.g. `1:05:09` or `24:13`.
@@ -464,14 +479,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let h = minutes / 60, m = minutes % 60
         if h == 0 { return "\(m)m" }
         return m == 0 ? "\(h)h" : "\(h)h\(m)m"
-    }
-
-    private func format(_ seconds: Int) -> String {
-        switch seconds {
-        case 0: L("Off")
-        case ..<60: L("%d sec", seconds)
-        default: L("%d min", seconds / 60)
-        }
     }
 }
 

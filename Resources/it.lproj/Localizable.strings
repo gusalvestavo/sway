@@ -56,3 +56,12 @@
 "You were away for %@" = "Sei stato via per %@";
 "The countdown waited for you." = "Il conto alla rovescia ti ha aspettato.";
 "That counts as a break, so the timer started over." = "Conta come una pausa, quindi il timer è ripartito.";
+
+/* Settings window */
+"Settings" = "Impostazioni";
+"Settings…" = "Impostazioni…";
+"Pause when away after" = "Metti in pausa se assente dopo";
+"No keyboard, mouse or trackpad input for this long stops the countdown." = "Senza usare tastiera, mouse o trackpad per questo tempo, il conto alla rovescia si ferma.";
+"Language" = "Lingua";
+"Same as the system" = "Come il sistema";
+"Pause after how many minutes away?" = "Mettere in pausa dopo quanti minuti di assenza?";
