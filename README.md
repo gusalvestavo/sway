@@ -15,11 +15,11 @@ Designed to encourage you to respect your time.
 </p>
 
 <p align="center">
-  <img src="docs/break.gif" alt="Sway's break overlay: the logo fills up as the break runs, Skip break unlocks after 5 seconds, and the break ends with Back to work" width="480">
+  <img src="docs/break.gif" alt="Sway's break overlay: the stretching cat sits on the card while the logo fills up, Skip break unlocks after 5 seconds, and the cheering cat appears with Back to work" width="480">
 </p>
 
 <p align="center">
-  <img src="docs/popover.png" alt="The heads-up popover under Sway's menu bar icon: Break in 0:05, with Start now and +1/+3/+5 min snooze" width="360">
+  <img src="docs/popover.png" alt="The heads-up popover under Sway's menu bar icon: the stretching cat, Break in 0:04, with Start now and +1/+3/+5 min snooze" width="480">
 </p>
 
 ## Features
