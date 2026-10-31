@@ -25,7 +25,7 @@ Designed to encourage you to respect your time.
 ## Features
 
 - **A cat to keep you company**: Sway's mascot works beside you in the menu, stretches when a break is near and through the break itself, and cheers when it's over.
-- **Menu bar countdown** to your next break, shown as hours and minutes (`1h20m`, `40m`). A tiny pause badge appears on the logo while paused.
+- **Menu bar countdown** to your next break, shown as hours and minutes (`1h20m`, `40m`). A tiny pause badge appears on the logo while paused, and outside work hours the countdown gives way to a beach umbrella.
 - **Live menu header** with a rolling countdown and buttons to add 1, 5 or 15 minutes.
 - **Heads-up popover** before each break (configurable: off, 30 sec, 1/2/5 min or custom), with *Start now* and the same +1/+3/+5 min snooze as the break overlay.
 - **Full-screen break overlay** on every display, fading in and out:

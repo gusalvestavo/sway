@@ -645,8 +645,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         case .away: title = short(Int(pausedRemaining))
         case .offHours: title = L("Off hours")
         }
-        statusItem.button?.title = " " + title
-        let image = [.paused, .away, .offHours].contains(phase) ? SwayMark.pausedMenuBarImage : SwayMark.menuBarImage
+        // Outside work hours the umbrella says it all, so there's no text.
+        statusItem.button?.title = phase == .offHours ? "" : " " + title
+        statusItem.button?.setAccessibilityLabel(phase == .offHours ? title : nil)
+        let image = switch phase {
+        case .offHours: SwayMark.offHoursMenuBarImage
+        case .paused, .away: SwayMark.pausedMenuBarImage
+        default: SwayMark.menuBarImage
+        }
         if statusItem.button?.image !== image { statusItem.button?.image = image }
         header?.update(headerState, animated: true)
     }

@@ -38,28 +38,47 @@ enum SwayMark {
         circle.stroke()
     }
 
-    @MainActor static let menuBarImage = makeMenuBarImage(paused: false)
-    @MainActor static let pausedMenuBarImage = makeMenuBarImage(paused: true)
+    @MainActor static let menuBarImage = makeMenuBarImage(badge: nil)
+    @MainActor static let pausedMenuBarImage = makeMenuBarImage(badge: .paused)
+    @MainActor static let offHoursMenuBarImage = makeMenuBarImage(badge: .offHours)
+
+    /// A small sign over the mark's top-right corner: a pause sign, or a beach umbrella outside work hours.
+    private enum Badge { case paused, offHours }
 
     /// Template image for the menu bar, so macOS tints it for light and dark menu bars.
-    /// The paused variant adds a tiny pause badge in the top-right corner.
-    private static func makeMenuBarImage(paused: Bool) -> NSImage {
-        let image = NSImage(size: NSSize(width: 18, height: 16), flipped: false) { rect in
+    private static func makeMenuBarImage(badge: Badge?) -> NSImage {
+        let umbrella = NSImage(systemSymbolName: "beach.umbrella.fill", accessibilityDescription: nil)?
+            .withSymbolConfiguration(.init(pointSize: 9, weight: .bold))
+        // Outside work hours the image grows a little, so the umbrella stands over the mark's open gap.
+        let size = badge == .offHours ? NSSize(width: 19, height: 18) : NSSize(width: 18, height: 16)
+        let image = NSImage(size: size, flipped: false) { rect in
             draw(in: NSRect(x: 1, y: 1, width: 14, height: 14), outer: .black,
                  inner: NSColor.black.withAlphaComponent(0.6), lineScale: 1.6)
-            guard paused else { return true }
-
-            // Clear a small disc so the badge stays legible where it overlaps the arc.
-            let badgeCenter = NSPoint(x: rect.maxX - 4, y: rect.maxY - 4)
-            NSGraphicsContext.current?.compositingOperation = .clear
-            NSBezierPath(ovalIn: NSRect(x: badgeCenter.x - 4, y: badgeCenter.y - 4, width: 8, height: 8)).fill()
-            NSGraphicsContext.current?.compositingOperation = .sourceOver
-
-            NSColor.black.setFill()
-            for dx: CGFloat in [-1.9, 0.7] {
-                NSBezierPath(roundedRect: NSRect(x: badgeCenter.x + dx, y: badgeCenter.y - 2.6,
-                                                 width: 1.2, height: 5.2),
-                             xRadius: 0.5, yRadius: 0.5).fill()
+            switch badge {
+            case nil:
+                break
+            case .paused:
+                // Clear a small disc so the badge stays legible where it overlaps the arc.
+                let badgeCenter = NSPoint(x: rect.maxX - 4, y: rect.maxY - 4)
+                NSGraphicsContext.current?.compositingOperation = .clear
+                NSBezierPath(ovalIn: NSRect(x: badgeCenter.x - 4, y: badgeCenter.y - 4, width: 8, height: 8)).fill()
+                NSGraphicsContext.current?.compositingOperation = .sourceOver
+                NSColor.black.setFill()
+                for dx: CGFloat in [-1.9, 0.7] {
+                    NSBezierPath(roundedRect: NSRect(x: badgeCenter.x + dx, y: badgeCenter.y - 2.6,
+                                                     width: 1.2, height: 5.2),
+                                 xRadius: 0.5, yRadius: 0.5).fill()
+                }
+            case .offHours:
+                guard let umbrella else { break }
+                let size = umbrella.size
+                let frame = NSRect(x: rect.maxX - size.width, y: rect.maxY - size.height, width: size.width, height: size.height)
+                // Cut a thin outline of the umbrella's own shape out of the mark, then draw it inside.
+                for angle in stride(from: 0.0, to: 2 * Double.pi, by: Double.pi / 8) {
+                    umbrella.draw(in: frame.offsetBy(dx: 1.2 * cos(angle), dy: 1.2 * sin(angle)),
+                                  from: .zero, operation: .destinationOut, fraction: 1)
+                }
+                umbrella.draw(in: frame)
             }
             return true
         }
