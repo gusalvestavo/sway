@@ -149,3 +149,26 @@
 "Back %@" = "Vuelve %@";
 "Start reminders anyway" = "Recordarme de todos modos";
 "%@ in" = "%@ en";
+
+"Time for a long break" = "Hora de un descanso largo";
+"Long break in" = "Descanso largo en";
+"Long break in %d:%02d" = "Descanso largo en %d:%02d";
+"Long break" = "Descanso largo";
+"Every %d breaks" = "Cada %d descansos";
+"Every few breaks, one runs longer, so you can get up and walk around." = "Cada pocos descansos, uno dura más, para que te levantes y camines un poco.";
+"Long break length in minutes?" = "¿Duración del descanso largo en minutos?";
+"Wellness" = "Bienestar";
+"Blink and look away every" = "Parpadear y mirar lejos cada";
+"Looking at a screen, you blink about half as often, which dries out your eyes." = "Mirando una pantalla parpadeas casi la mitad de veces, y eso reseca los ojos.";
+"Check my posture every" = "Revisar mi postura cada";
+"A nudge to sit back, drop your shoulders and unclench your jaw." = "Un aviso para apoyar la espalda, bajar los hombros y relajar la mandíbula.";
+"Nudges count only your working time and show for a few seconds under the menu bar icon. One that comes due just before a break is left to the break, and they wait whenever Smart Pause would hold a break." = "Los avisos cuentan solo tu tiempo de trabajo y aparecen unos segundos bajo el icono de la barra de menús. Uno que toca justo antes de un descanso se deja al descanso, y esperan siempre que la Pausa inteligente retendría un descanso.";
+"Remind me to blink every how many minutes?" = "¿Cada cuántos minutos te recuerdo parpadear?";
+"Remind me about my posture every how many minutes?" = "¿Cada cuántos minutos te recuerdo la postura?";
+"Blink slowly a few times" = "Parpadea despacio unas cuantas veces";
+"Check your posture" = "Revisa tu postura";
+"Then look at something far away for 20 seconds." = "Luego mira algo lejano durante 20 segundos.";
+"Let your eyes rest on something across the room." = "Deja descansar la vista en algo al otro lado de la habitación.";
+"Sit back, drop your shoulders and unclench your jaw." = "Apoya la espalda, baja los hombros y relaja la mandíbula.";
+"Feet flat on the floor, screen at eye level." = "Pies en el suelo, pantalla a la altura de los ojos.";
+"Roll your shoulders and sway a little." = "Gira los hombros y balancéate un poco.";

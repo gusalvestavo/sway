@@ -149,3 +149,26 @@
 "Back %@" = "%@ 재개";
 "Start reminders anyway" = "그래도 알림 받기";
 "%@ in" = "%@까지";
+
+"Time for a long break" = "긴 휴식 시간이에요";
+"Long break in" = "긴 휴식까지";
+"Long break in %d:%02d" = "%d:%02d 후 긴 휴식";
+"Long break" = "긴 휴식";
+"Every %d breaks" = "%d번마다";
+"Every few breaks, one runs longer, so you can get up and walk around." = "몇 번에 한 번은 휴식이 길어져요. 일어나서 좀 걸어 보세요.";
+"Long break length in minutes?" = "긴 휴식 시간(분)은?";
+"Wellness" = "웰니스";
+"Blink and look away every" = "눈 깜빡이고 먼 곳 보기 간격";
+"Looking at a screen, you blink about half as often, which dries out your eyes." = "화면을 보는 동안에는 눈을 절반 정도만 깜빡여서 눈이 건조해져요.";
+"Check my posture every" = "자세 확인 간격";
+"A nudge to sit back, drop your shoulders and unclench your jaw." = "등을 기대고, 어깨를 내리고, 턱에 힘을 빼도록 알려 줘요.";
+"Nudges count only your working time and show for a few seconds under the menu bar icon. One that comes due just before a break is left to the break, and they wait whenever Smart Pause would hold a break." = "알림은 작업 시간만 세고 메뉴 막대 아이콘 아래에 몇 초 동안 나타나요. 휴식 직전에 올 알림은 휴식으로 대신하고, 스마트 일시정지가 휴식을 미룰 때는 기다려요.";
+"Remind me to blink every how many minutes?" = "몇 분마다 눈 깜빡임을 알려 드릴까요?";
+"Remind me about my posture every how many minutes?" = "몇 분마다 자세를 알려 드릴까요?";
+"Blink slowly a few times" = "천천히 눈을 몇 번 깜빡이세요";
+"Check your posture" = "자세를 확인하세요";
+"Then look at something far away for 20 seconds." = "그다음 20초 동안 먼 곳을 바라보세요.";
+"Let your eyes rest on something across the room." = "방 건너편에 있는 것을 보며 눈을 쉬게 하세요.";
+"Sit back, drop your shoulders and unclench your jaw." = "등을 기대고, 어깨를 내리고, 턱에 힘을 빼세요.";
+"Feet flat on the floor, screen at eye level." = "발은 바닥에 붙이고, 화면은 눈높이에 맞추세요.";
+"Roll your shoulders and sway a little." = "어깨를 돌리고 몸을 살짝 흔들어 보세요.";

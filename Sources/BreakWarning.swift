@@ -10,6 +10,7 @@ final class BreakWarning: NSObject {
     private let popover = NSPopover()
     private let titleLabel = NSTextField(labelWithString: "")
     private var hideTimer: Timer?
+    private var long = false
 
     /// The popover hides itself after this long so it never lingers.
     private let visibleSeconds: TimeInterval = 12
@@ -65,7 +66,9 @@ final class BreakWarning: NSObject {
         popover.animates = true
     }
 
-    func show(relativeTo button: NSStatusBarButton, remaining: TimeInterval) {
+    /// `long` says the coming break is a long one.
+    func show(relativeTo button: NSStatusBarButton, remaining: TimeInterval, long: Bool = false) {
+        self.long = long
         update(remaining: remaining)
         // Size the popover to its content so the button row is never clipped.
         if let content = popover.contentViewController?.view {
@@ -82,7 +85,8 @@ final class BreakWarning: NSObject {
 
     func update(remaining: TimeInterval) {
         let seconds = max(0, Int(remaining.rounded(.up)))
-        titleLabel.stringValue = L("Break in %d:%02d", seconds / 60, seconds % 60)
+        titleLabel.stringValue = long ? L("Long break in %d:%02d", seconds / 60, seconds % 60)
+                                      : L("Break in %d:%02d", seconds / 60, seconds % 60)
     }
 
     func close() {

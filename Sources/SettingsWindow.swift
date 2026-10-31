@@ -2,7 +2,8 @@ import AppKit
 import ServiceManagement
 import UniformTypeIdentifiers
 
-/// The Settings window, in tabs: timing and general options, when to pause or hold breaks, and the schedule.
+/// The Settings window, in tabs: timing and general options, blink and posture nudges, when to pause
+/// or hold breaks, and the schedule.
 @MainActor
 final class SettingsWindow: NSObject, NSWindowDelegate {
     /// The work interval changed, so the countdown should start over.
@@ -11,10 +12,12 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
     var onChanged: () -> Void = {}
     /// The language changed; the window already rebuilt itself.
     var onLanguageChanged: () -> Void = {}
+    /// A blink or posture nudge was turned on, off or changed, so they should start counting again.
+    var onNudgesChanged: () -> Void = {}
 
     private var window: NSWindow?
 
-    private enum Field: Int { case work, breakLength, warn, idle }
+    private enum Field: Int { case work, breakLength, longBreak, warn, idle, blink, posture }
 
     /// Presets shared with the menu's submenus.
     static let workPresets = [20, 30, 45, 60, 90].map { $0 * 60 }
@@ -23,8 +26,11 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
     private static let options: [Field: [Int]] = [
         .work: workPresets,
         .breakLength: breakPresets,
+        .longBreak: [0, 10, 15, 20, 30].map { $0 * 60 },
         .warn: [0, 30, 60, 120, 300],
         .idle: [0, 30, 60, 120, 300],
+        .blink: [0, 10, 15, 20, 30].map { $0 * 60 },
+        .posture: [0, 15, 30, 45, 60].map { $0 * 60 },
     ]
     /// Tag of each popup's last item, which asks for a custom value.
     private static let customTag = -1
@@ -54,7 +60,7 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         return window
     }
 
-    private enum Tab: Int { case general, smartPause, schedule }
+    private enum Tab: Int { case general, wellness, smartPause, schedule }
 
     /// Builds the window's content in the current language, keeping the selected tab.
     private func fill(_ window: NSWindow) {
@@ -63,15 +69,19 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         focusAppList = nil
         plannedList = nil
         workHourControls = []
+        longBreakEvery = nil
 
         let tabs = SettingsTabs()
         tabs.tabStyle = .toolbar
-        for tab in [Tab.general, .smartPause, .schedule] {
+        for tab in [Tab.general, .wellness, .smartPause, .schedule] {
             let item = NSTabViewItem(viewController: page(tab))
             switch tab {
             case .general:
                 item.label = L("General")
                 item.image = NSImage(systemSymbolName: "gearshape", accessibilityDescription: nil)
+            case .wellness:
+                item.label = L("Wellness")
+                item.image = NSImage(systemSymbolName: "eye", accessibilityDescription: nil)
             case .smartPause:
                 item.label = L("Smart Pause")
                 item.image = NSImage(systemSymbolName: "pause.circle", accessibilityDescription: nil)
@@ -97,6 +107,9 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
             rows = [
                 [label(L("Remind me every")), popup(.work)],
                 [label(L("Break length")), popup(.breakLength)],
+                [label(L("Long break")), popup(.longBreak)],
+                [label(""), longBreakEveryPopup()],
+                [label(""), hint(L("Every few breaks, one runs longer, so you can get up and walk around."))],
                 [label(L("Warn me before breaks")), popup(.warn)],
                 [label(L("Sounds")), soundsCheckbox()],
                 [label(L("Volume")), volumeSlider()],
@@ -104,7 +117,16 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
                 [label(L("Language")), languagePopup()],
                 [label(""), launchAtLoginCheckbox()],
             ]
-            gaps = [3: 14, 6: 14]
+            gaps = [2: 10, 5: 10, 6: 14, 9: 14]
+        case .wellness:
+            rows = [
+                [label(L("Blink and look away every")), popup(.blink)],
+                [label(""), hint(L("Looking at a screen, you blink about half as often, which dries out your eyes."))],
+                [label(L("Check my posture every")), popup(.posture)],
+                [label(""), hint(L("A nudge to sit back, drop your shoulders and unclench your jaw."))],
+                [label(""), hint(L("Nudges count only your working time and show for a few seconds under the menu bar icon. One that comes due just before a break is left to the break, and they wait whenever Smart Pause would hold a break."))],
+            ]
+            gaps = [2: 14, 4: 14]
         case .smartPause:
             let activities = Activity.allCases.enumerated().map { index, activity in
                 [label(index == 0 ? L("Keep counting during") : ""), activityCheckbox(activity)]
@@ -209,6 +231,9 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         switch field {
         case .work: Settings.workSeconds
         case .breakLength: Settings.breakSeconds
+        case .longBreak: Settings.longBreakSeconds
+        case .blink: Settings.blinkSeconds
+        case .posture: Settings.postureSeconds
         case .warn: Settings.warnSeconds
         case .idle: Settings.idleSeconds
         }
@@ -237,6 +262,23 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         popup.addItem(withTitle: L("Custom…"))
         popup.lastItem?.tag = Self.customTag
         popup.selectItem(withTag: current)
+    }
+
+    /// How often a break is a long one, e.g. "Every 4 breaks"; only used while long breaks are on.
+    private var longBreakEvery: NSPopUpButton?
+
+    private func longBreakEveryPopup() -> NSPopUpButton {
+        let popup = NSPopUpButton()
+        for count in 2...6 {
+            popup.addItem(withTitle: L("Every %d breaks", count))
+            popup.lastItem?.tag = count
+        }
+        popup.selectItem(withTag: Settings.longBreakEvery)
+        popup.isEnabled = Settings.longBreakSeconds > 0
+        popup.target = self
+        popup.action = #selector(longBreakEveryChosen(_:))
+        longBreakEvery = popup
+        return popup
     }
 
     private func languagePopup() -> NSPopUpButton {
@@ -464,6 +506,9 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         let question = switch field {
         case .work: L("Remind me every how many minutes?")
         case .breakLength: L("Break length in minutes?")
+        case .longBreak: L("Long break length in minutes?")
+        case .blink: L("Remind me to blink every how many minutes?")
+        case .posture: L("Remind me about my posture every how many minutes?")
         case .warn: L("Warn me how many minutes before a break?")
         case .idle: L("Pause after how many minutes away?")
         }
@@ -492,6 +537,12 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
             Settings.workSeconds = seconds
             onWorkChanged()
         case .breakLength: Settings.breakSeconds = seconds; onChanged()
+        case .longBreak:
+            Settings.longBreakSeconds = seconds
+            longBreakEvery?.isEnabled = seconds > 0
+            onChanged()
+        case .blink: Settings.blinkSeconds = seconds; onNudgesChanged()
+        case .posture: Settings.postureSeconds = seconds; onNudgesChanged()
         case .warn: Settings.warnSeconds = seconds; onChanged()
         case .idle:
             Settings.idleSeconds = seconds
@@ -499,6 +550,11 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
             for checkbox in activityCheckboxes { checkbox.isEnabled = seconds > 0 }
             onChanged()
         }
+    }
+
+    @objc private func longBreakEveryChosen(_ popup: NSPopUpButton) {
+        Settings.longBreakEvery = popup.selectedTag()
+        onChanged()
     }
 
     @objc private func toggleHoldBreaks(_ checkbox: NSButton) {

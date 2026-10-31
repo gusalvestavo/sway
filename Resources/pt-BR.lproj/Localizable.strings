@@ -149,3 +149,26 @@
 "Back %@" = "Volta %@";
 "Start reminders anyway" = "Lembrar mesmo assim";
 "%@ in" = "%@ em";
+
+"Time for a long break" = "Hora de um intervalo longo";
+"Long break in" = "Intervalo longo em";
+"Long break in %d:%02d" = "Intervalo longo em %d:%02d";
+"Long break" = "Intervalo longo";
+"Every %d breaks" = "A cada %d intervalos";
+"Every few breaks, one runs longer, so you can get up and walk around." = "A cada alguns intervalos, um dura mais, para você levantar e dar uma volta.";
+"Long break length in minutes?" = "Duração do intervalo longo em minutos?";
+"Wellness" = "Bem-estar";
+"Blink and look away every" = "Piscar e olhar longe a cada";
+"Looking at a screen, you blink about half as often, which dries out your eyes." = "Olhando para a tela, você pisca cerca de metade das vezes, o que resseca os olhos.";
+"Check my posture every" = "Conferir a postura a cada";
+"A nudge to sit back, drop your shoulders and unclench your jaw." = "Um lembrete para encostar na cadeira, baixar os ombros e soltar a mandíbula.";
+"Nudges count only your working time and show for a few seconds under the menu bar icon. One that comes due just before a break is left to the break, and they wait whenever Smart Pause would hold a break." = "Os lembretes contam só o tempo de trabalho e aparecem por alguns segundos sob o ícone da barra de menus. Um que vence logo antes de um intervalo fica por conta do intervalo, e eles esperam sempre que a Pausa inteligente seguraria um intervalo.";
+"Remind me to blink every how many minutes?" = "Lembrar de piscar a cada quantos minutos?";
+"Remind me about my posture every how many minutes?" = "Lembrar da postura a cada quantos minutos?";
+"Blink slowly a few times" = "Pisque devagar algumas vezes";
+"Check your posture" = "Confira sua postura";
+"Then look at something far away for 20 seconds." = "Depois olhe para algo distante por 20 segundos.";
+"Let your eyes rest on something across the room." = "Descanse os olhos em algo do outro lado da sala.";
+"Sit back, drop your shoulders and unclench your jaw." = "Encoste na cadeira, baixe os ombros e solte a mandíbula.";
+"Feet flat on the floor, screen at eye level." = "Pés no chão, tela na altura dos olhos.";
+"Roll your shoulders and sway a little." = "Gire os ombros e balance um pouco o corpo.";

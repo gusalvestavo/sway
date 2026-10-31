@@ -71,6 +71,8 @@ final class Greeting: NSObject {
         popover.animates = true
     }
 
+    var isShown: Bool { popover.isShown }
+
     /// `nextBreak` is the new countdown's length, already formatted (e.g. "45 min").
     func show(relativeTo button: NSStatusBarButton, nextBreak: String) {
         // Built on each show so a language change since launch is picked up.

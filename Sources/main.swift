@@ -15,6 +15,29 @@ enum Settings {
         set { defaults.set(newValue, forKey: "breakSeconds") }
     }
 
+    /// Length of the long break that replaces a regular one every few breaks; 0 turns long breaks off.
+    static var longBreakSeconds: Int {
+        get { defaults.object(forKey: "longBreakSeconds") as? Int ?? 0 }
+        set { defaults.set(newValue, forKey: "longBreakSeconds") }
+    }
+
+    /// One break in this many is a long one.
+    static var longBreakEvery: Int {
+        get { defaults.object(forKey: "longBreakEvery") as? Int ?? 4 }
+        set { defaults.set(newValue, forKey: "longBreakEvery") }
+    }
+
+    /// How often the blink and posture nudges come between breaks; 0 turns each off.
+    static var blinkSeconds: Int {
+        get { defaults.object(forKey: "blinkSeconds") as? Int ?? 0 }
+        set { defaults.set(newValue, forKey: "blinkSeconds") }
+    }
+
+    static var postureSeconds: Int {
+        get { defaults.object(forKey: "postureSeconds") as? Int ?? 0 }
+        set { defaults.set(newValue, forKey: "postureSeconds") }
+    }
+
     /// How long before a break the warning popover appears; 0 turns it off.
     static var warnSeconds: Int {
         get { defaults.object(forKey: "warnSeconds") as? Int ?? 60 }
@@ -145,6 +168,7 @@ let intervalOverride = argument("--interval-seconds")
 let breakOverride = argument("--break-seconds")
 let warnOverride = argument("--warn-seconds")
 let idleOverride = argument("--idle-seconds")
+let longBreakOverride = argument("--long-break-seconds")
 
 /// Seconds since the last keyboard, mouse or trackpad event in this login session.
 /// Needs no permission, unlike watching the events themselves.
@@ -166,6 +190,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private let settings = SettingsWindow()
     private let awayNotice = AwayNotice()
     private let greeting = Greeting()
+    private let nudgeNotice = NudgeNotice()
     private var welcome: Welcome?
     private var timer: Timer?
     private var phase: Phase = .working
@@ -193,6 +218,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var currentPlanned: PlannedBreak?
     /// The previous tick, to notice a planned break's time passing (and sleep, as a long gap).
     private var lastTick = Date()
+    /// Breaks since the last long one, and the count before the break on screen started, so
+    /// snoozing that break doesn't count it twice.
+    private var breaksSinceLong = 0
+    private var breaksBeforeThis = 0
+    /// Working time since each blink or posture nudge last showed; breaks and time away don't add to it.
+    private var nudgeWorked: [Nudge: TimeInterval] = [:]
+    /// A nudge that's due but held back (by a call, say) tries again at this time.
+    private var nudgeRetry = Date.distantPast
     /// "Start reminders anyway" outside work hours lasts until this time.
     private var offHoursOverride = Date.distantPast
     /// When a call, video or other activity that keeps the countdown running was last seen.
@@ -207,6 +240,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var warnSeconds: Int { warnOverride ?? Settings.warnSeconds }
     /// No input for this long freezes the countdown; 0 never does.
     private var idleSeconds: Int { idleOverride ?? Settings.idleSeconds }
+    private var longBreakSeconds: Int { longBreakOverride ?? Settings.longBreakSeconds }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         overlay.onEnd = { [unowned self] in startWork() }
@@ -214,6 +248,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         connectWarning()
         settings.onWorkChanged = { [unowned self] in startWork() }
         settings.onChanged = { [unowned self] in updateDisplay() }
+        settings.onNudgesChanged = { [unowned self] in nudgeWorked = [:] }
         settings.onLanguageChanged = { [unowned self] in
             // The popover's labels are built once, so rebuild it in the new language.
             warning.close()
@@ -295,13 +330,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private func startBreak(planned: PlannedBreak? = nil) {
         warning.close()
         greeting.close()
+        nudgeNotice.close()
         phase = .onBreak
         hold = nil
         if let planned { markDone(planned) }
         currentPlanned = planned
-        let length = planned.map { TimeInterval($0.length * 60) } ?? TimeInterval(breakSeconds)
+        let long = planned == nil && longBreakNext
+        let length = planned.map { TimeInterval($0.length * 60) } ?? TimeInterval(long ? longBreakSeconds : breakSeconds)
+        breaksBeforeThis = breaksSinceLong
+        countBreak(lasting: length)
+        // A nudge held back until now is covered by the break.
+        for nudge in Nudge.allCases where nudge.seconds > 0 && nudgeWorked[nudge, default: 0] >= TimeInterval(nudge.seconds) {
+            nudgeWorked[nudge] = 0
+        }
         deadline = Date().addingTimeInterval(length)
-        overlay.show(duration: length, title: planned?.title)
+        overlay.show(duration: length, title: planned?.title ?? (long ? L("Time for a long break") : nil))
         Sound.breakStart.play()
         updateDisplay()
     }
@@ -343,12 +386,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 return
             }
             hold = nil
+            checkNudges(untilBreak: remaining)
             // Each planned break gets its own heads-up, apart from the regular cycle's.
             let warned = next.planned.map { $0.id == warnedPlanned } ?? warnedThisCycle
             if !warned, warnSeconds > 0, remaining <= TimeInterval(warnSeconds),
                let button = statusItem.button {
                 if let planned = next.planned { warnedPlanned = planned.id } else { warnedThisCycle = true }
-                warning.show(relativeTo: button, remaining: remaining)
+                nudgeNotice.close()
+                warning.show(relativeTo: button, remaining: remaining, long: next.planned == nil && longBreakNext)
                 Sound.headsUp.play()
             } else if warning.isShown {
                 warning.update(remaining: remaining)
@@ -425,6 +470,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     /// The break screen's +1/+3/+5 min: a planned break comes back later as itself.
     private func postpone(minutes: Int) {
+        breaksSinceLong = breaksBeforeThis
         guard let planned = currentPlanned else {
             startWork(after: minutes * 60)
             return
@@ -443,6 +489,36 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         Settings.plannedBreaksDone[planned.id.uuidString] = Date()
         plannedSnoozes[planned.id] = nil
         plannedPending.remove(planned.id)
+    }
+
+    // MARK: Long breaks and nudges
+
+    /// The next regular break is a long one.
+    private var longBreakNext: Bool {
+        longBreakSeconds > 0 && breaksSinceLong + 1 >= Settings.longBreakEvery
+    }
+
+    /// Counts a break toward the next long one; one at least as long as a long break, such as
+    /// lunch or a long time away, starts the count over.
+    private func countBreak(lasting seconds: TimeInterval) {
+        breaksSinceLong = longBreakSeconds > 0 && seconds >= TimeInterval(longBreakSeconds) ? 0 : breaksSinceLong + 1
+    }
+
+    /// Counts a second of work toward each nudge and shows one that's due. It waits while a break
+    /// is close (and the break then covers it), while something would hold a break (a call, a focus
+    /// app, full screen if that's on), or while another popover is up.
+    private func checkNudges(untilBreak remaining: TimeInterval) {
+        let now = Date()
+        for nudge in Nudge.allCases where nudge.seconds > 0 { nudgeWorked[nudge, default: 0] += 1 }
+        guard let nudge = Nudge.allCases.first(where: { $0.seconds > 0 && nudgeWorked[$0, default: 0] >= TimeInterval($0.seconds) }),
+              now >= nudgeRetry, remaining > TimeInterval(warnSeconds + 30) else { return }
+        if warning.isShown || awayNotice.isShown || greeting.isShown || nudgeNotice.isShown
+            || Hold.current(waited: Hold.typingLimit) != nil {
+            nudgeRetry = now.addingTimeInterval(30)
+        } else if let button = statusItem.button {
+            nudgeWorked[nudge] = 0
+            nudgeNotice.show(nudge, relativeTo: button)
+        }
     }
 
     /// Time without input, minus the time spent in a call, watching a video or similar, so
@@ -476,6 +552,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         lastActive = now
         Settings.lastActive = now
         sleptOrLocked = false
+        breaksSinceLong = 0
+        nudgeWorked = [:]
         startWork()
         if let button = statusItem.button {
             greeting.show(relativeTo: button, nextBreak: SettingsWindow.format(workSeconds))
@@ -503,6 +581,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let countedAsBreak = sleptOrLocked
         sleptOrLocked = false
         if countedAsBreak {
+            countBreak(lasting: away)
             startWork()
         } else {
             phase = .working
@@ -595,9 +674,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
     }
 
-    /// "Next break in 24:13", or "Lunch in 4:59" when a planned break comes first.
+    /// "Next break in 24:13", "Long break in 24:13", or "Lunch in 4:59" when a planned break comes first.
     private func countdownHeader(_ next: (date: Date, planned: PlannedBreak?)) -> HeaderState {
-        HeaderState(caption: next.planned.map { L("%@ in", $0.title) } ?? L("Next break in"),
+        HeaderState(caption: next.planned.map { L("%@ in", $0.title) } ?? (longBreakNext ? L("Long break in") : L("Next break in")),
                     value: clock(secondsUntil(next.date)), showsAddTime: true, mascot: .focus)
     }
 
@@ -641,7 +720,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                              customAction: #selector(customBreak)))
         menu.addItem(.separator())
 
-        if intervalOverride != nil || breakOverride != nil || warnOverride != nil || idleOverride != nil {
+        if intervalOverride != nil || breakOverride != nil || warnOverride != nil || idleOverride != nil || longBreakOverride != nil {
             let note = NSMenuItem(title: "Test mode: \(workSeconds)s work, \(breakSeconds)s break, \(warnSeconds)s warning, \(idleSeconds)s idle",
                                   action: nil, keyEquivalent: "")
             note.isEnabled = false

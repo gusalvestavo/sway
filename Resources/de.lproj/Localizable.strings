@@ -149,3 +149,26 @@
 "Back %@" = "Zurück %@";
 "Start reminders anyway" = "Trotzdem erinnern";
 "%@ in" = "%@ in";
+
+"Time for a long break" = "Zeit für eine lange Pause";
+"Long break in" = "Lange Pause in";
+"Long break in %d:%02d" = "Lange Pause in %d:%02d";
+"Long break" = "Lange Pause";
+"Every %d breaks" = "Alle %d Pausen";
+"Every few breaks, one runs longer, so you can get up and walk around." = "Alle paar Pausen dauert eine länger, damit du aufstehen und herumgehen kannst.";
+"Long break length in minutes?" = "Dauer der langen Pause in Minuten?";
+"Wellness" = "Wohlbefinden";
+"Blink and look away every" = "Blinzeln und in die Ferne schauen alle";
+"Looking at a screen, you blink about half as often, which dries out your eyes." = "Vor dem Bildschirm blinzelst du nur etwa halb so oft, und das trocknet die Augen aus.";
+"Check my posture every" = "Haltung prüfen alle";
+"A nudge to sit back, drop your shoulders and unclench your jaw." = "Ein Hinweis, dich anzulehnen, die Schultern zu senken und den Kiefer zu lockern.";
+"Nudges count only your working time and show for a few seconds under the menu bar icon. One that comes due just before a break is left to the break, and they wait whenever Smart Pause would hold a break." = "Hinweise zählen nur deine Arbeitszeit und erscheinen einige Sekunden unter dem Symbol in der Menüleiste. Einer, der kurz vor einer Pause fällig wird, entfällt zugunsten der Pause, und sie warten immer dann, wenn die Intelligente Pause eine Pause zurückhalten würde.";
+"Remind me to blink every how many minutes?" = "Alle wie viele Minuten ans Blinzeln erinnern?";
+"Remind me about my posture every how many minutes?" = "Alle wie viele Minuten an die Haltung erinnern?";
+"Blink slowly a few times" = "Blinzle ein paar Mal langsam";
+"Check your posture" = "Prüfe deine Haltung";
+"Then look at something far away for 20 seconds." = "Schau dann 20 Sekunden lang auf etwas in der Ferne.";
+"Let your eyes rest on something across the room." = "Lass den Blick auf etwas am anderen Ende des Raums ruhen.";
+"Sit back, drop your shoulders and unclench your jaw." = "Lehn dich zurück, senk die Schultern und lockere den Kiefer.";
+"Feet flat on the floor, screen at eye level." = "Füße flach auf dem Boden, Bildschirm auf Augenhöhe.";
+"Roll your shoulders and sway a little." = "Kreise die Schultern und wiege dich ein wenig.";

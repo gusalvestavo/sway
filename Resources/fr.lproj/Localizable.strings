@@ -149,3 +149,26 @@
 "Back %@" = "Reprise %@";
 "Start reminders anyway" = "Me rappeler quand même";
 "%@ in" = "%@ dans";
+
+"Time for a long break" = "C’est l’heure d’une longue pause";
+"Long break in" = "Longue pause dans";
+"Long break in %d:%02d" = "Longue pause dans %d:%02d";
+"Long break" = "Longue pause";
+"Every %d breaks" = "Toutes les %d pauses";
+"Every few breaks, one runs longer, so you can get up and walk around." = "Régulièrement, une pause dure plus longtemps, pour vous lever et marcher un peu.";
+"Long break length in minutes?" = "Durée de la longue pause en minutes ?";
+"Wellness" = "Bien-être";
+"Blink and look away every" = "Cligner et regarder au loin toutes les";
+"Looking at a screen, you blink about half as often, which dries out your eyes." = "Devant un écran, on cligne des yeux environ deux fois moins, ce qui les assèche.";
+"Check my posture every" = "Vérifier ma posture toutes les";
+"A nudge to sit back, drop your shoulders and unclench your jaw." = "Un rappel pour vous adosser, baisser les épaules et desserrer la mâchoire.";
+"Nudges count only your working time and show for a few seconds under the menu bar icon. One that comes due just before a break is left to the break, and they wait whenever Smart Pause would hold a break." = "Les rappels ne comptent que votre temps de travail et s’affichent quelques secondes sous l’icône de la barre des menus. Un rappel prévu juste avant une pause est laissé à la pause, et ils attendent chaque fois que la Pause intelligente retiendrait une pause.";
+"Remind me to blink every how many minutes?" = "Me rappeler de cligner des yeux toutes les combien de minutes ?";
+"Remind me about my posture every how many minutes?" = "Me rappeler ma posture toutes les combien de minutes ?";
+"Blink slowly a few times" = "Clignez lentement des yeux plusieurs fois";
+"Check your posture" = "Vérifiez votre posture";
+"Then look at something far away for 20 seconds." = "Puis regardez quelque chose au loin pendant 20 secondes.";
+"Let your eyes rest on something across the room." = "Posez votre regard sur quelque chose à l’autre bout de la pièce.";
+"Sit back, drop your shoulders and unclench your jaw." = "Adossez-vous, baissez les épaules et desserrez la mâchoire.";
+"Feet flat on the floor, screen at eye level." = "Pieds à plat au sol, écran à hauteur des yeux.";
+"Roll your shoulders and sway a little." = "Roulez des épaules et balancez-vous un peu.";

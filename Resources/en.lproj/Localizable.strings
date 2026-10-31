@@ -149,3 +149,26 @@
 "Back %@" = "Back %@";
 "Start reminders anyway" = "Start reminders anyway";
 "%@ in" = "%@ in";
+
+"Time for a long break" = "Time for a long break";
+"Long break in" = "Long break in";
+"Long break in %d:%02d" = "Long break in %d:%02d";
+"Long break" = "Long break";
+"Every %d breaks" = "Every %d breaks";
+"Every few breaks, one runs longer, so you can get up and walk around." = "Every few breaks, one runs longer, so you can get up and walk around.";
+"Long break length in minutes?" = "Long break length in minutes?";
+"Wellness" = "Wellness";
+"Blink and look away every" = "Blink and look away every";
+"Looking at a screen, you blink about half as often, which dries out your eyes." = "Looking at a screen, you blink about half as often, which dries out your eyes.";
+"Check my posture every" = "Check my posture every";
+"A nudge to sit back, drop your shoulders and unclench your jaw." = "A nudge to sit back, drop your shoulders and unclench your jaw.";
+"Nudges count only your working time and show for a few seconds under the menu bar icon. One that comes due just before a break is left to the break, and they wait whenever Smart Pause would hold a break." = "Nudges count only your working time and show for a few seconds under the menu bar icon. One that comes due just before a break is left to the break, and they wait whenever Smart Pause would hold a break.";
+"Remind me to blink every how many minutes?" = "Remind me to blink every how many minutes?";
+"Remind me about my posture every how many minutes?" = "Remind me about my posture every how many minutes?";
+"Blink slowly a few times" = "Blink slowly a few times";
+"Check your posture" = "Check your posture";
+"Then look at something far away for 20 seconds." = "Then look at something far away for 20 seconds.";
+"Let your eyes rest on something across the room." = "Let your eyes rest on something across the room.";
+"Sit back, drop your shoulders and unclench your jaw." = "Sit back, drop your shoulders and unclench your jaw.";
+"Feet flat on the floor, screen at eye level." = "Feet flat on the floor, screen at eye level.";
+"Roll your shoulders and sway a little." = "Roll your shoulders and sway a little.";

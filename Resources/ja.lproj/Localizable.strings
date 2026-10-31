@@ -149,3 +149,26 @@
 "Back %@" = "%@に再開";
 "Start reminders anyway" = "それでも通知する";
 "%@ in" = "%@まで";
+
+"Time for a long break" = "長めの休憩の時間です";
+"Long break in" = "長めの休憩まで";
+"Long break in %d:%02d" = "長めの休憩まで %d:%02d";
+"Long break" = "長めの休憩";
+"Every %d breaks" = "%d回ごと";
+"Every few breaks, one runs longer, so you can get up and walk around." = "何回かに一度、休憩を長めにします。立ち上がって少し歩きましょう。";
+"Long break length in minutes?" = "長めの休憩の長さ（分）は？";
+"Wellness" = "ウェルネス";
+"Blink and look away every" = "まばたきと遠くを見る間隔";
+"Looking at a screen, you blink about half as often, which dries out your eyes." = "画面を見ていると、まばたきの回数がおよそ半分に減り、目が乾きます。";
+"Check my posture every" = "姿勢チェックの間隔";
+"A nudge to sit back, drop your shoulders and unclench your jaw." = "背もたれに寄りかかり、肩の力を抜き、あごをゆるめるよう知らせます。";
+"Nudges count only your working time and show for a few seconds under the menu bar icon. One that comes due just before a break is left to the break, and they wait whenever Smart Pause would hold a break." = "お知らせは作業中の時間だけを数え、メニューバーのアイコンの下に数秒表示されます。休憩の直前に来るものは休憩に任せ、スマート一時停止が休憩を待たせる間は待ちます。";
+"Remind me to blink every how many minutes?" = "まばたきの通知は何分ごとにしますか？";
+"Remind me about my posture every how many minutes?" = "姿勢の通知は何分ごとにしますか？";
+"Blink slowly a few times" = "ゆっくり何度かまばたきしましょう";
+"Check your posture" = "姿勢をチェックしましょう";
+"Then look at something far away for 20 seconds." = "それから20秒ほど遠くを見ましょう。";
+"Let your eyes rest on something across the room." = "部屋の向こう側にあるものに目を休めましょう。";
+"Sit back, drop your shoulders and unclench your jaw." = "背もたれに寄りかかり、肩の力を抜いて、あごをゆるめましょう。";
+"Feet flat on the floor, screen at eye level." = "足は床にしっかりつけ、画面は目の高さに。";
+"Roll your shoulders and sway a little." = "肩を回して、体を少し揺らしましょう。";

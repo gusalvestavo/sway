@@ -149,3 +149,26 @@
 "Back %@" = "%@ 恢复";
 "Start reminders anyway" = "仍然提醒我";
 "%@ in" = "距%@";
+
+"Time for a long break" = "该长时间休息了";
+"Long break in" = "距长休息还有";
+"Long break in %d:%02d" = "距长休息还有 %d:%02d";
+"Long break" = "长休息";
+"Every %d breaks" = "每 %d 次休息";
+"Every few breaks, one runs longer, so you can get up and walk around." = "每隔几次休息，就有一次更长，让你起身走一走。";
+"Long break length in minutes?" = "长休息时长（分钟）？";
+"Wellness" = "健康";
+"Blink and look away every" = "眨眼并远眺间隔";
+"Looking at a screen, you blink about half as often, which dries out your eyes." = "看屏幕时，你眨眼的次数大约只有平时的一半，眼睛会因此变干。";
+"Check my posture every" = "检查坐姿间隔";
+"A nudge to sit back, drop your shoulders and unclench your jaw." = "提醒你靠回椅背、放松肩膀、松开下巴。";
+"Nudges count only your working time and show for a few seconds under the menu bar icon. One that comes due just before a break is left to the break, and they wait whenever Smart Pause would hold a break." = "提醒只计算你的工作时间，并在菜单栏图标下方显示几秒钟。临近休息时到期的提醒交给休息，在智能暂停会推迟休息时也会等待。";
+"Remind me to blink every how many minutes?" = "每隔多少分钟提醒你眨眼？";
+"Remind me about my posture every how many minutes?" = "每隔多少分钟提醒你注意坐姿？";
+"Blink slowly a few times" = "慢慢眨几下眼睛";
+"Check your posture" = "检查一下坐姿";
+"Then look at something far away for 20 seconds." = "然后看向远处 20 秒。";
+"Let your eyes rest on something across the room." = "让目光落在房间另一头的东西上，休息一下眼睛。";
+"Sit back, drop your shoulders and unclench your jaw." = "靠回椅背，放松肩膀，松开下巴。";
+"Feet flat on the floor, screen at eye level." = "双脚平放地面，屏幕与视线齐平。";
+"Roll your shoulders and sway a little." = "转转肩膀，轻轻晃动一下身体。";
