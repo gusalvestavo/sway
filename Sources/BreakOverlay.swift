@@ -131,6 +131,8 @@ final class BreakOverlay: NSObject {
                 context.timingFunction = CAMediaTimingFunction(name: .easeOut)
                 windows.forEach { $0.animator().alphaValue = 1 }
             }
+            // The backdrop, card and cat fade in first, then the card's contents.
+            panels.forEach { $0.reveal(after: fadeInDuration / 2) }
         }
     }
 
@@ -261,6 +263,11 @@ private final class OverlayPanel: BackdropView {
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    /// The cat and the card show right away; the break itself fades in, then the buttons.
+    func reveal(after start: TimeInterval) {
+        Reveal.stagger(groups: [[titleLabel, ring, messageLabel], [snoozeRow, skipButton, lockButton]], after: start)
+    }
 
     func update(progress: Double, remaining: TimeInterval, finished: Bool, animated: Bool) {
         self.finished = finished

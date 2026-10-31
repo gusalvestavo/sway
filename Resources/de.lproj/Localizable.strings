@@ -88,3 +88,33 @@
 "You're capable of more than you think. Show today!" = "Du kannst mehr, als du denkst. Zeig es heute!";
 "Today's a great day to make progress. Ready, set, go!" = "Heute ist ein toller Tag, um voranzukommen. Auf die Plätze, fertig, los!";
 "Your best work is still ahead of you. Let's start!" = "Deine beste Arbeit liegt noch vor dir. Fangen wir an!";
+
+/* Activities that keep the countdown running */
+"Keep counting during" = "Weiterzählen bei";
+"Calls and meetings" = "Anrufen und Meetings";
+"Videos and presentations" = "Videos und Präsentationen";
+"Music and other audio" = "Musik und anderem Audio";
+"Calls are noticed by the microphone or camera being in use, videos by an app keeping the screen awake. Keep-awake apps count as a video." = "Anrufe werden erkannt, wenn Mikrofon oder Kamera benutzt werden, Videos, wenn eine App den Bildschirm wach hält. Apps, die den Bildschirm wach halten, zählen als Video.";
+"After the call" = "Nach dem Anruf";
+"Next break" = "Nächste Pause";
+"A break that comes due during a call waits until it ends." = "Eine Pause, die während eines Anrufs fällig wird, wartet, bis er endet.";
+"During calls" = "Bei Anrufen";
+"Hold breaks until the call ends" = "Pausen bis zum Ende des Anrufs aufschieben";
+
+/* Welcome window */
+"Welcome to Sway" = "Willkommen bei Sway";
+"Sometimes, all you need is a moment to clear your mind." = "Manchmal braucht es nur einen Moment, um den Kopf freizubekommen.";
+"How long do you want to focus before a break?" = "Wie lange möchtest du dich konzentrieren, bevor du eine Pause machst?";
+"Sway will remind you when it's time to step away." = "Sway erinnert dich, wenn es Zeit für eine Pause ist.";
+"How long should your breaks be?" = "Wie lange sollen deine Pausen dauern?";
+"Time to stand up, stretch and sway a little." = "Zeit, aufzustehen, dich zu strecken und ein wenig zu bewegen.";
+"You're good to go!" = "Alles bereit!";
+"You can customize Sway further anytime in Settings." = "Du kannst Sway jederzeit in den Einstellungen weiter anpassen.";
+"Next" = "Weiter";
+"Go back" = "Zurück";
+"Step %d of %d" = "Schritt %d von %d";
+
+"Sounds" = "Töne";
+"Play sounds for breaks" = "Töne für Pausen abspielen";
+"Volume" = "Lautstärke";
+"A soft chime for the heads-up, the start of a break and its end." = "Ein sanfter Klang beim Hinweis, zu Beginn und am Ende einer Pause.";

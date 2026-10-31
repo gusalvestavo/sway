@@ -88,3 +88,33 @@
 "You're capable of more than you think. Show today!" = "Sei capace di più di quanto pensi. Dimostralo oggi!";
 "Today's a great day to make progress. Ready, set, go!" = "Oggi è un ottimo giorno per fare progressi. Pronti, partenza, via!";
 "Your best work is still ahead of you. Let's start!" = "Il tuo lavoro migliore deve ancora venire. Cominciamo!";
+
+/* Activities that keep the countdown running */
+"Keep counting during" = "Continua a contare durante";
+"Calls and meetings" = "Chiamate e riunioni";
+"Videos and presentations" = "Video e presentazioni";
+"Music and other audio" = "Musica e altro audio";
+"Calls are noticed by the microphone or camera being in use, videos by an app keeping the screen awake. Keep-awake apps count as a video." = "Le chiamate vengono rilevate dal microfono o dalla fotocamera in uso, i video da un’app che tiene lo schermo acceso. Le app che tengono lo schermo acceso contano come video.";
+"After the call" = "Dopo la chiamata";
+"Next break" = "Prossima pausa";
+"A break that comes due during a call waits until it ends." = "Una pausa che scade durante una chiamata aspetta che finisca.";
+"During calls" = "Durante le chiamate";
+"Hold breaks until the call ends" = "Rimanda le pause alla fine della chiamata";
+
+/* Welcome window */
+"Welcome to Sway" = "Benvenuto in Sway";
+"Sometimes, all you need is a moment to clear your mind." = "A volte basta un momento per schiarirsi le idee.";
+"How long do you want to focus before a break?" = "Quanto vuoi concentrarti prima di una pausa?";
+"Sway will remind you when it's time to step away." = "Sway ti avviserà quando sarà il momento di staccare.";
+"How long should your breaks be?" = "Quanto devono durare le tue pause?";
+"Time to stand up, stretch and sway a little." = "È ora di alzarti, sgranchirti e muoverti un po’.";
+"You're good to go!" = "Tutto pronto!";
+"You can customize Sway further anytime in Settings." = "Puoi personalizzare Sway quando vuoi nelle Impostazioni.";
+"Next" = "Avanti";
+"Go back" = "Indietro";
+"Step %d of %d" = "Passo %d di %d";
+
+"Sounds" = "Suoni";
+"Play sounds for breaks" = "Riproduci suoni per le pause";
+"Volume" = "Volume";
+"A soft chime for the heads-up, the start of a break and its end." = "Un suono delicato per l’avviso, all’inizio e alla fine di una pausa.";

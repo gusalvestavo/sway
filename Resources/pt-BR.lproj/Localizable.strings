@@ -88,3 +88,33 @@
 "You're capable of more than you think. Show today!" = "Você é capaz de mais do que imagina. Mostre isso hoje!";
 "Today's a great day to make progress. Ready, set, go!" = "Hoje é um ótimo dia para avançar. Preparar, apontar, já!";
 "Your best work is still ahead of you. Let's start!" = "Seu melhor trabalho ainda está por vir. Vamos começar!";
+
+/* Activities that keep the countdown running */
+"Keep counting during" = "Continuar contando durante";
+"Calls and meetings" = "Chamadas e reuniões";
+"Videos and presentations" = "Vídeos e apresentações";
+"Music and other audio" = "Música e outros áudios";
+"Calls are noticed by the microphone or camera being in use, videos by an app keeping the screen awake. Keep-awake apps count as a video." = "Chamadas são detectadas pelo microfone ou câmera em uso, e vídeos por um app mantendo a tela acesa. Apps que mantêm a tela acesa contam como vídeo.";
+"After the call" = "Após a chamada";
+"Next break" = "Próximo intervalo";
+"A break that comes due during a call waits until it ends." = "Um intervalo que chega durante uma chamada espera ela terminar.";
+"During calls" = "Durante chamadas";
+"Hold breaks until the call ends" = "Segurar intervalos até a chamada terminar";
+
+/* Welcome window */
+"Welcome to Sway" = "Boas-vindas ao Sway";
+"Sometimes, all you need is a moment to clear your mind." = "Às vezes, tudo o que você precisa é de um momento para clarear a mente.";
+"How long do you want to focus before a break?" = "Quanto tempo você quer se concentrar antes de uma pausa?";
+"Sway will remind you when it's time to step away." = "O Sway vai avisar quando for hora de dar uma pausa.";
+"How long should your breaks be?" = "Quanto tempo devem durar suas pausas?";
+"Time to stand up, stretch and sway a little." = "Hora de levantar, alongar e se mexer um pouco.";
+"You're good to go!" = "Tudo pronto!";
+"You can customize Sway further anytime in Settings." = "Você pode personalizar o Sway quando quiser nos Ajustes.";
+"Next" = "Continuar";
+"Go back" = "Voltar";
+"Step %d of %d" = "Etapa %d de %d";
+
+"Sounds" = "Sons";
+"Play sounds for breaks" = "Tocar sons nos intervalos";
+"Volume" = "Volume";
+"A soft chime for the heads-up, the start of a break and its end." = "Um som suave no aviso, no início e no fim de cada intervalo.";

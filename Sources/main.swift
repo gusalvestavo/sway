@@ -27,6 +27,44 @@ enum Settings {
         set { defaults.set(newValue, forKey: "idleSeconds") }
     }
 
+    /// Whether `activity` keeps the countdown running while there's no input.
+    static func keepsCounting(_ activity: Activity) -> Bool {
+        defaults.object(forKey: "keepCounting." + activity.rawValue) as? Bool ?? activity.enabledByDefault
+    }
+
+    static func setKeepsCounting(_ activity: Activity, _ on: Bool) {
+        defaults.set(on, forKey: "keepCounting." + activity.rawValue)
+    }
+
+    /// Whether a break that comes due during a call waits until the call ends.
+    static var holdBreaksDuringCalls: Bool {
+        get { defaults.object(forKey: "holdBreaksDuringCalls") as? Bool ?? true }
+        set { defaults.set(newValue, forKey: "holdBreaksDuringCalls") }
+    }
+
+    /// Chimes for the heads-up, the start of a break and its end.
+    static var playSounds: Bool {
+        get { defaults.object(forKey: "playSounds") as? Bool ?? true }
+        set { defaults.set(newValue, forKey: "playSounds") }
+    }
+
+    /// From 0 to 1.
+    static var soundVolume: Double {
+        get { defaults.object(forKey: "soundVolume") as? Double ?? 0.7 }
+        set { defaults.set(newValue, forKey: "soundVolume") }
+    }
+
+    /// The welcome window was shown (and finished or closed).
+    static var welcomed: Bool {
+        get { defaults.bool(forKey: "welcomed") }
+        set { defaults.set(newValue, forKey: "welcomed") }
+    }
+
+    /// Nothing saved yet, so this is a new install rather than an update.
+    static var isFirstLaunch: Bool {
+        !welcomed && defaults.object(forKey: "lastActive") == nil && defaults.object(forKey: "workSeconds") == nil
+    }
+
     /// When you last used the Mac, so a launch the next morning still greets you.
     static var lastActive: Date? {
         get { defaults.object(forKey: "lastActive") as? Date }
@@ -72,6 +110,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private let settings = SettingsWindow()
     private let awayNotice = AwayNotice()
     private let greeting = Greeting()
+    private var welcome: Welcome?
     private var timer: Timer?
     private var phase: Phase = .working
     private var deadline = Date()
@@ -85,6 +124,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     /// The Mac slept or the screen locked since you last came back, which counts as a break.
     private var sleptOrLocked = false
     private var warnedThisCycle = false
+    /// When a call, video or other activity that keeps the countdown running was last seen.
+    private var lastBusy = Date.distantPast
     /// Your last input, for noticing the first return of a new day.
     private var lastActive = Settings.lastActive ?? Date()
     /// The menu's header while the menu is open, so ticks can keep it live.
@@ -114,6 +155,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.delegate = self
         statusItem.menu = menu
         startWork()
+        // `--welcome` shows the welcome window again (handy for testing).
+        if Settings.isFirstLaunch || CommandLine.arguments.contains("--welcome") { showWelcome() }
 
         let timer = Timer(timeInterval: 1, repeats: true) { _ in
             MainActor.assumeIsolated { self.tick() }
@@ -130,6 +173,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                                 name: NSNotification.Name("com.apple.screenIsLocked"), object: nil)
         distributed.addObserver(self, selector: #selector(screenDidUnlock),
                                 name: NSNotification.Name("com.apple.screenIsUnlocked"), object: nil)
+    }
+
+    private func showWelcome() {
+        let welcome = Welcome()
+        welcome.onFinish = { [unowned self] in
+            // Start the countdown over with the chosen interval.
+            settings.refresh()
+            startWork()
+            self.welcome = nil
+        }
+        self.welcome = welcome
+        welcome.show()
     }
 
     private func connectWarning() {
@@ -158,31 +213,41 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         phase = .onBreak
         deadline = Date().addingTimeInterval(TimeInterval(breakSeconds))
         overlay.show(duration: TimeInterval(breakSeconds))
+        Sound.breakStart.play()
         updateDisplay()
     }
 
     private func tick() {
-        let idle = secondsSinceLastInput()
+        let input = secondsSinceLastInput()
         // Input behind the lock screen (typing the password) isn't a return yet.
         if !screenLocked {
-            if idle < 2, greetIfNewDay() { return }
-            noteActivity(at: Date().addingTimeInterval(-idle))
+            if input < 2, greetIfNewDay() { return }
+            if phase != .working { noteActivity(at: Date().addingTimeInterval(-input)) }
         }
         switch phase {
         case .working:
+            let idle = idleSeconds > 0 ? idleTime(input: input) : input
+            if !screenLocked { noteActivity(at: Date().addingTimeInterval(-idle)) }
             if idleSeconds > 0, idle >= TimeInterval(idleSeconds) {
                 goAway(idle: idle)
                 return
             }
             let remaining = deadline.timeIntervalSinceNow
             if remaining <= 0 {
-                startBreak()
+                // A break that comes due during a call waits until the call ends.
+                if Settings.holdBreaksDuringCalls, Activity.calls.isHappening {
+                    warning.close()
+                    updateDisplay()
+                } else {
+                    startBreak()
+                }
                 return
             }
             if !warnedThisCycle, warnSeconds > 0, remaining <= TimeInterval(warnSeconds),
                let button = statusItem.button {
                 warnedThisCycle = true
                 warning.show(relativeTo: button, remaining: remaining)
+                Sound.headsUp.play()
             } else if warning.isShown {
                 warning.update(remaining: remaining)
             }
@@ -193,6 +258,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 // Keep the overlay up until you come back and click "Back to work".
                 phase = .breakOver
                 overlay.showFinished()
+                Sound.breakOver.play()
                 updateDisplay()
             } else {
                 overlay.update(remaining: remaining)
@@ -200,10 +266,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             }
         case .away:
             // Behind the lock screen the notice would go unseen, so wait for the unlock.
-            if !screenLocked, idle < 2 { comeBack() }
+            if !screenLocked, input < 2 { comeBack() }
         case .breakOver, .paused:
             break
         }
+    }
+
+    /// Time without input, minus the time spent in a call, watching a video or similar, so
+    /// those keep the countdown running. The checks only run once input has stopped for long.
+    private func idleTime(input: TimeInterval) -> TimeInterval {
+        if input >= TimeInterval(idleSeconds),
+           Activity.allCases.contains(where: { Settings.keepsCounting($0) && $0.isHappening }) {
+            lastBusy = Date()
+        }
+        return min(input, Date().timeIntervalSince(lastBusy))
     }
 
     private func noteActivity(at date: Date) {
@@ -305,7 +381,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private func updateDisplay() {
         let title: String
         switch phase {
-        case .working: title = short(remainingSeconds)
+        case .working: title = waitingForCall ? L("After the call") : short(remainingSeconds)
         case .onBreak: title = L("Break %@", short(remainingSeconds))
         case .breakOver: title = L("Break done")
         case .paused: title = L("Paused %@", short(Int(pausedRemaining)))
@@ -317,8 +393,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         header?.update(headerState, animated: true)
     }
 
+    /// The countdown ran out during a call, so the break waits for the call to end.
+    private var waitingForCall: Bool { phase == .working && deadline.timeIntervalSinceNow <= 0 }
+
     private var headerState: HeaderState {
         switch phase {
+        case .working where waitingForCall:
+            HeaderState(caption: L("Next break"), value: L("After the call"), showsAddTime: true, mascot: .focus)
         case .working:
             HeaderState(caption: L("Next break in"), value: clock(remainingSeconds), showsAddTime: true, mascot: .focus)
         case .onBreak:

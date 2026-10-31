@@ -1,7 +1,7 @@
 import AppKit
 import ServiceManagement
 
-/// The Settings window: timing, language and Launch at Login.
+/// The Settings window: timing, sounds, language and Launch at Login.
 @MainActor
 final class SettingsWindow: NSObject, NSWindowDelegate {
     /// The work interval changed, so the countdown should start over.
@@ -51,6 +51,7 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
     /// Builds the window's content in the current language.
     private func fill(_ window: NSWindow) {
         window.title = L("Settings")
+        activityCheckboxes = []
 
         let rows: [[NSView]] = [
             [label(L("Remind me every")), popup(.work)],
@@ -58,6 +59,15 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
             [label(L("Warn me before breaks")), popup(.warn)],
             [label(L("Pause when away after")), popup(.idle)],
             [label(""), hint(L("No keyboard, mouse or trackpad input for this long stops the countdown."))],
+        ] + Activity.allCases.enumerated().map { index, activity in
+            [label(index == 0 ? L("Keep counting during") : ""), activityCheckbox(activity)]
+        } + [
+            [label(""), hint(L("Calls are noticed by the microphone or camera being in use, videos by an app keeping the screen awake. Keep-awake apps count as a video."))],
+            [label(L("During calls")), holdBreaksCheckbox()],
+            [label(""), hint(L("A break that comes due during a call waits until it ends."))],
+            [label(L("Sounds")), soundsCheckbox()],
+            [label(L("Volume")), volumeSlider()],
+            [label(""), hint(L("A soft chime for the heads-up, the start of a break and its end."))],
             [label(L("Language")), languagePopup()],
             [label(""), launchAtLoginCheckbox()],
         ]
@@ -66,8 +76,11 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         grid.columnSpacing = 12
         grid.column(at: 0).xPlacement = .trailing
         grid.rowAlignment = .firstBaseline
-        // Extra room between the timing rows and the general ones.
-        grid.row(at: 5).topPadding = 14
+        // Extra room before the activities, the calls section, the sounds and the general rows.
+        grid.row(at: 5).topPadding = 6
+        grid.row(at: rows.count - 7).topPadding = 14
+        grid.row(at: rows.count - 5).topPadding = 14
+        grid.row(at: rows.count - 2).topPadding = 14
 
         let container = NSView()
         let header = brandHeader()
@@ -174,6 +187,51 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         return popup
     }
 
+    private var activityCheckboxes: [NSButton] = []
+
+    private func activityCheckbox(_ activity: Activity) -> NSButton {
+        let checkbox = NSButton(checkboxWithTitle: activity.title, target: self, action: #selector(toggleActivity(_:)))
+        checkbox.tag = Activity.allCases.firstIndex(of: activity)!
+        checkbox.state = Settings.keepsCounting(activity) ? .on : .off
+        checkbox.isEnabled = Settings.idleSeconds > 0
+        activityCheckboxes.append(checkbox)
+        return checkbox
+    }
+
+    private func holdBreaksCheckbox() -> NSButton {
+        let checkbox = NSButton(checkboxWithTitle: L("Hold breaks until the call ends"), target: self,
+                                action: #selector(toggleHoldBreaks(_:)))
+        checkbox.state = Settings.holdBreaksDuringCalls ? .on : .off
+        return checkbox
+    }
+
+    private var volume: NSSlider?
+
+    private func soundsCheckbox() -> NSButton {
+        let checkbox = NSButton(checkboxWithTitle: L("Play sounds for breaks"), target: self,
+                                action: #selector(toggleSounds(_:)))
+        checkbox.state = Settings.playSounds ? .on : .off
+        return checkbox
+    }
+
+    /// A slider between a quiet and a loud speaker; letting go plays the heads-up chime at the new volume.
+    private func volumeSlider() -> NSView {
+        let slider = NSSlider(value: Settings.soundVolume, minValue: 0.05, maxValue: 1, target: self,
+                              action: #selector(volumeChanged(_:)))
+        slider.isContinuous = false
+        slider.isEnabled = Settings.playSounds
+        slider.widthAnchor.constraint(equalToConstant: 160).isActive = true
+        volume = slider
+        let speaker = { (name: String) in
+            let view = NSImageView(image: NSImage(systemSymbolName: name, accessibilityDescription: nil)!)
+            view.contentTintColor = .secondaryLabelColor
+            return view
+        }
+        let row = NSStackView(views: [speaker("speaker.fill"), slider, speaker("speaker.wave.3.fill")])
+        row.spacing = 6
+        return row
+    }
+
     private func launchAtLoginCheckbox() -> NSButton {
         let checkbox = NSButton(checkboxWithTitle: L("Launch at Login"), target: self,
                                 action: #selector(toggleLaunchAtLogin(_:)))
@@ -228,8 +286,31 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
             onWorkChanged()
         case .breakLength: Settings.breakSeconds = seconds; onChanged()
         case .warn: Settings.warnSeconds = seconds; onChanged()
-        case .idle: Settings.idleSeconds = seconds; onChanged()
+        case .idle:
+            Settings.idleSeconds = seconds
+            // The activities only matter while away detection is on.
+            for checkbox in activityCheckboxes { checkbox.isEnabled = seconds > 0 }
+            onChanged()
         }
+    }
+
+    @objc private func toggleHoldBreaks(_ checkbox: NSButton) {
+        Settings.holdBreaksDuringCalls = checkbox.state == .on
+        onChanged()
+    }
+
+    @objc private func toggleSounds(_ checkbox: NSButton) {
+        Settings.playSounds = checkbox.state == .on
+        volume?.isEnabled = Settings.playSounds
+    }
+
+    @objc private func volumeChanged(_ slider: NSSlider) {
+        Settings.soundVolume = slider.doubleValue
+        Sound.headsUp.preview()
+    }
+
+    @objc private func toggleActivity(_ checkbox: NSButton) {
+        Settings.setKeepsCounting(Activity.allCases[checkbox.tag], checkbox.state == .on)
     }
 
     @objc private func languageChosen(_ popup: NSPopUpButton) {

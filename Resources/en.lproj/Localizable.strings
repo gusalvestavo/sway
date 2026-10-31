@@ -88,3 +88,33 @@
 "You're capable of more than you think. Show today!" = "You're capable of more than you think. Show today!";
 "Today's a great day to make progress. Ready, set, go!" = "Today's a great day to make progress. Ready, set, go!";
 "Your best work is still ahead of you. Let's start!" = "Your best work is still ahead of you. Let's start!";
+
+/* Activities that keep the countdown running */
+"Keep counting during" = "Keep counting during";
+"Calls and meetings" = "Calls and meetings";
+"Videos and presentations" = "Videos and presentations";
+"Music and other audio" = "Music and other audio";
+"Calls are noticed by the microphone or camera being in use, videos by an app keeping the screen awake. Keep-awake apps count as a video." = "Calls are noticed by the microphone or camera being in use, videos by an app keeping the screen awake. Keep-awake apps count as a video.";
+"After the call" = "After the call";
+"Next break" = "Next break";
+"A break that comes due during a call waits until it ends." = "A break that comes due during a call waits until it ends.";
+"During calls" = "During calls";
+"Hold breaks until the call ends" = "Hold breaks until the call ends";
+
+/* Welcome window */
+"Welcome to Sway" = "Welcome to Sway";
+"Sometimes, all you need is a moment to clear your mind." = "Sometimes, all you need is a moment to clear your mind.";
+"How long do you want to focus before a break?" = "How long do you want to focus before a break?";
+"Sway will remind you when it's time to step away." = "Sway will remind you when it's time to step away.";
+"How long should your breaks be?" = "How long should your breaks be?";
+"Time to stand up, stretch and sway a little." = "Time to stand up, stretch and sway a little.";
+"You're good to go!" = "You're good to go!";
+"You can customize Sway further anytime in Settings." = "You can customize Sway further anytime in Settings.";
+"Next" = "Next";
+"Go back" = "Go back";
+"Step %d of %d" = "Step %d of %d";
+
+"Sounds" = "Sounds";
+"Play sounds for breaks" = "Play sounds for breaks";
+"Volume" = "Volume";
+"A soft chime for the heads-up, the start of a break and its end." = "A soft chime for the heads-up, the start of a break and its end.";

@@ -88,3 +88,33 @@
 "You're capable of more than you think. Show today!" = "あなたは思っている以上にできる。今日それを見せよう！";
 "Today's a great day to make progress. Ready, set, go!" = "今日は前に進むのにぴったりの日。よーい、どん！";
 "Your best work is still ahead of you. Let's start!" = "最高の仕事はまだこれから。さあ、始めよう！";
+
+/* Activities that keep the countdown running */
+"Keep counting during" = "次の間もカウントを続ける";
+"Calls and meetings" = "通話と会議";
+"Videos and presentations" = "ビデオとプレゼンテーション";
+"Music and other audio" = "音楽やその他のオーディオ";
+"Calls are noticed by the microphone or camera being in use, videos by an app keeping the screen awake. Keep-awake apps count as a video." = "通話はマイクまたはカメラの使用で、ビデオは画面をスリープさせないアプリで検出します。画面をスリープさせないアプリはビデオとして扱われます。";
+"After the call" = "通話のあと";
+"Next break" = "次の休憩";
+"A break that comes due during a call waits until it ends." = "通話中に休憩の時間になった場合は、通話が終わるまで待ちます。";
+"During calls" = "通話中";
+"Hold breaks until the call ends" = "通話が終わるまで休憩を待つ";
+
+/* Welcome window */
+"Welcome to Sway" = "Swayへようこそ";
+"Sometimes, all you need is a moment to clear your mind." = "ときには、頭をすっきりさせるひとときがあれば十分です。";
+"How long do you want to focus before a break?" = "休憩までどれくらい集中しますか？";
+"Sway will remind you when it's time to step away." = "ひと休みする時間になったら、Swayがお知らせします。";
+"How long should your breaks be?" = "休憩の長さはどれくらいにしますか？";
+"Time to stand up, stretch and sway a little." = "立ち上がって、ストレッチして、少し体を揺らしましょう。";
+"You're good to go!" = "準備完了です！";
+"You can customize Sway further anytime in Settings." = "設定からいつでも細かくカスタマイズできます。";
+"Next" = "次へ";
+"Go back" = "戻る";
+"Step %d of %d" = "ステップ %d/%d";
+
+"Sounds" = "サウンド";
+"Play sounds for breaks" = "休憩時にサウンドを再生";
+"Volume" = "音量";
+"A soft chime for the heads-up, the start of a break and its end." = "予告時、休憩の開始時と終了時にやさしい音が鳴ります。";

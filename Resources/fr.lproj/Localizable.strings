@@ -88,3 +88,33 @@
 "You're capable of more than you think. Show today!" = "Vous êtes capable de plus que vous ne le pensez. Montrez-le aujourd’hui !";
 "Today's a great day to make progress. Ready, set, go!" = "Aujourd’hui est un excellent jour pour avancer. À vos marques, prêts, partez !";
 "Your best work is still ahead of you. Let's start!" = "Votre meilleur travail est encore devant vous. Commençons !";
+
+/* Activities that keep the countdown running */
+"Keep counting during" = "Continuer pendant";
+"Calls and meetings" = "Appels et réunions";
+"Videos and presentations" = "Vidéos et présentations";
+"Music and other audio" = "Musique et autres sons";
+"Calls are noticed by the microphone or camera being in use, videos by an app keeping the screen awake. Keep-awake apps count as a video." = "Les appels sont détectés quand le micro ou la caméra est utilisé, les vidéos quand une app garde l’écran allumé. Les apps qui gardent l’écran allumé comptent comme une vidéo.";
+"After the call" = "Après l’appel";
+"Next break" = "Prochaine pause";
+"A break that comes due during a call waits until it ends." = "Une pause prévue pendant un appel attend la fin de l’appel.";
+"During calls" = "Pendant les appels";
+"Hold breaks until the call ends" = "Reporter les pauses à la fin de l’appel";
+
+/* Welcome window */
+"Welcome to Sway" = "Bienvenue dans Sway";
+"Sometimes, all you need is a moment to clear your mind." = "Parfois, il suffit d’un moment pour se vider la tête.";
+"How long do you want to focus before a break?" = "Combien de temps voulez-vous vous concentrer avant une pause ?";
+"Sway will remind you when it's time to step away." = "Sway vous préviendra quand il sera temps de faire une pause.";
+"How long should your breaks be?" = "Combien de temps doivent durer vos pauses ?";
+"Time to stand up, stretch and sway a little." = "Le moment de vous lever, de vous étirer et de bouger un peu.";
+"You're good to go!" = "Tout est prêt !";
+"You can customize Sway further anytime in Settings." = "Vous pourrez personnaliser Sway à tout moment dans les Réglages.";
+"Next" = "Suivant";
+"Go back" = "Retour";
+"Step %d of %d" = "Étape %d sur %d";
+
+"Sounds" = "Sons";
+"Play sounds for breaks" = "Jouer des sons pour les pauses";
+"Volume" = "Volume";
+"A soft chime for the heads-up, the start of a break and its end." = "Un son doux pour l’avertissement, au début et à la fin d’une pause.";

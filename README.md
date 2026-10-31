@@ -31,10 +31,13 @@ Designed to encourage you to respect your time.
 - **Full-screen break overlay** on every display, fading in and out:
   - the primary display shows the Sway logo filling up as the break runs, a random calming message, snooze buttons (+1/+3/+5 min), *Skip break* (available after 5 seconds) and *Lock screen*;
   - other displays are just blurred.
+- **Gentle sounds**: a soft chime for the heads-up, a calm arpeggio as the break starts and a bright little run when it's over, with an on/off switch and volume in Settings. They're synthesized by `tools/sounds.swift`.
 - **Liquid Glass** styling on macOS 26+, including a layered glass app icon; older systems get the standard look.
 - **Good-morning greeting**: the first time you're back on a new day, the excited cat greets you with a motivational message and the countdown starts fresh.
+- **A welcome on first launch** walks you through picking your work interval and break length in a few steps.
 - **Pauses while you're away**: after 30 seconds without keyboard, mouse or trackpad input the countdown stops (adjustable or off), and when you're back a popover says how long you were gone.
-- **Work interval and break length** right in the menu, and a **Settings window** (gear icon in the menu) for the work interval, break length, heads-up, away detection, language and *Launch at Login*, all saved between launches. Sleep or a locked screen counts as a break.
+- **Keeps counting through calls and videos**: with the microphone or camera in use, or an app keeping the screen awake for a video or slideshow, the countdown keeps going without input, and a break that comes due during a call waits until it ends. Each activity, plus music and other audio, can be turned on or off in Settings.
+- **Work interval and break length** right in the menu, and a **Settings window** (gear icon in the menu) for the work interval, break length, heads-up, away detection, sounds, language and *Launch at Login*, all saved between launches. Sleep or a locked screen counts as a break.
 - Available in English, Português (Brasil), Español, Français, Deutsch, Italiano, 日本語, 한국어 and 简体中文, following your Mac's language or the one you pick in Settings.
 
 ## Requirements

@@ -22,6 +22,8 @@ xcrun actool Resources/AppIcon.icon --compile "$APP/Contents/Resources" --app-ic
 cp -R Resources/*.lproj "$APP/Contents/Resources/"
 # The mascot's poses, cut out from docs/brand/mascot-sheet.webp.
 cp -R Resources/Mascot "$APP/Contents/Resources/"
+# The break chimes, made by tools/sounds.swift.
+cp -R Resources/Sounds "$APP/Contents/Resources/"
 
 cat > "$APP/Contents/Info.plist" <<'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>

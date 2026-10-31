@@ -88,3 +88,33 @@
 "You're capable of more than you think. Show today!" = "你比自己想象的更有能力。今天就证明给自己看！";
 "Today's a great day to make progress. Ready, set, go!" = "今天是取得进展的好日子。预备，开始！";
 "Your best work is still ahead of you. Let's start!" = "你最好的作品还在前方。开始吧！";
+
+/* Activities that keep the countdown running */
+"Keep counting during" = "以下情况继续计时";
+"Calls and meetings" = "通话和会议";
+"Videos and presentations" = "视频和演示";
+"Music and other audio" = "音乐和其他音频";
+"Calls are noticed by the microphone or camera being in use, videos by an app keeping the screen awake. Keep-awake apps count as a video." = "通话通过麦克风或摄像头的使用来识别，视频通过保持屏幕常亮的 App 来识别。保持屏幕常亮的 App 会被视为视频。";
+"After the call" = "通话结束后";
+"Next break" = "下次休息";
+"A break that comes due during a call waits until it ends." = "通话期间到了休息时间时，会等通话结束后再开始。";
+"During calls" = "通话期间";
+"Hold breaks until the call ends" = "通话结束后再开始休息";
+
+/* Welcome window */
+"Welcome to Sway" = "欢迎使用 Sway";
+"Sometimes, all you need is a moment to clear your mind." = "有时候，你只需要片刻时间来放空思绪。";
+"How long do you want to focus before a break?" = "你想专注多久再休息？";
+"Sway will remind you when it's time to step away." = "该休息一下时，Sway 会提醒你。";
+"How long should your breaks be?" = "每次休息多长时间？";
+"Time to stand up, stretch and sway a little." = "站起来，伸展一下，轻轻活动活动身体。";
+"You're good to go!" = "一切就绪！";
+"You can customize Sway further anytime in Settings." = "你可以随时在设置中进一步自定义 Sway。";
+"Next" = "下一步";
+"Go back" = "返回";
+"Step %d of %d" = "第 %d 步，共 %d 步";
+
+"Sounds" = "声音";
+"Play sounds for breaks" = "休息时播放声音";
+"Volume" = "音量";
+"A soft chime for the heads-up, the start of a break and its end." = "提醒时、休息开始和结束时会响起柔和的提示音。";
