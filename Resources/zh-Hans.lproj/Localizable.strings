@@ -58,7 +58,6 @@
 "That counts as a break, so the timer started over." = "这算作一次休息，计时器已重新开始。";
 
 /* Settings window */
-"Settings" = "设置";
 "Settings…" = "设置…";
 "Pause when away after" = "离开多久后暂停";
 "No keyboard, mouse or trackpad input for this long stops the countdown." = "在这段时间内没有键盘、鼠标或触控板操作，倒计时会停止。";
@@ -97,9 +96,6 @@
 "Calls are noticed by the microphone or camera being in use, videos by an app keeping the screen awake. Keep-awake apps count as a video." = "通话通过麦克风或摄像头的使用来识别，视频通过保持屏幕常亮的 App 来识别。保持屏幕常亮的 App 会被视为视频。";
 "After the call" = "通话结束后";
 "Next break" = "下次休息";
-"A break that comes due during a call waits until it ends." = "通话期间到了休息时间时，会等通话结束后再开始。";
-"During calls" = "通话期间";
-"Hold breaks until the call ends" = "通话结束后再开始休息";
 
 /* Welcome window */
 "Welcome to Sway" = "欢迎使用 Sway";
@@ -118,3 +114,38 @@
 "Play sounds for breaks" = "休息时播放声音";
 "Volume" = "音量";
 "A soft chime for the heads-up, the start of a break and its end." = "提醒时、休息开始和结束时会响起柔和的提示音。";
+
+"In a moment" = "马上";
+"After %@" = "%@之后";
+"General" = "通用";
+"Smart Pause" = "智能暂停";
+"Schedule" = "日程";
+"Hold breaks" = "推迟休息";
+"During calls and meetings" = "通话和会议期间";
+"While I'm typing or dragging" = "我正在打字或拖动时";
+"While an app is in full screen" = "有应用全屏时";
+"Focus apps" = "专注应用";
+"Add App…" = "添加应用…";
+"Add" = "添加";
+"Remove" = "移除";
+"A break that comes due waits until the call ends or you leave the app. Typing holds it for up to a minute, until you pause." = "到了休息时间时，会等通话结束或你离开该应用后再开始。打字时最多等一分钟，直到你停下来。";
+"Work hours" = "工作时间";
+"Only remind me during work hours" = "只在工作时间提醒";
+"Days" = "日期";
+"Hours" = "时间";
+"to" = "至";
+"Outside these hours Sway stays quiet. When they begin, a fresh countdown starts." = "在这些时间之外，Sway 不会打扰你。工作时间开始时，会重新开始倒计时。";
+"Planned breaks" = "计划休息";
+"Name" = "名称";
+"for" = "时长";
+"Add Break" = "添加休息";
+"Lunch" = "午餐";
+"Walk" = "散步";
+"Break" = "休息";
+"Each starts at its time with its own name and length, and gets a heads-up like other breaks. One whose time passes while you're away is skipped." = "每个计划休息会在设定时间以自己的名称和时长开始，并像其他休息一样提前提醒。如果时间在你离开时已过，则会跳过。";
+"Off hours" = "非工作时间";
+"Outside work hours" = "现在不是工作时间";
+"Back at %@" = "%@ 恢复";
+"Back %@" = "%@ 恢复";
+"Start reminders anyway" = "仍然提醒我";
+"%@ in" = "距%@";

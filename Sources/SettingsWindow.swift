@@ -1,7 +1,8 @@
 import AppKit
 import ServiceManagement
+import UniformTypeIdentifiers
 
-/// The Settings window: timing, sounds, language and Launch at Login.
+/// The Settings window, in tabs: timing and general options, when to pause or hold breaks, and the schedule.
 @MainActor
 final class SettingsWindow: NSObject, NSWindowDelegate {
     /// The work interval changed, so the countdown should start over.
@@ -34,6 +35,11 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         window?.makeKeyAndOrderFront(nil)
     }
 
+    /// Ends any edit in progress, so a planned break's name typed just before closing is saved.
+    func windowWillClose(_ notification: Notification) {
+        window?.makeFirstResponder(nil)
+    }
+
     /// Shows values changed elsewhere, such as from the menu.
     func refresh() {
         if let window { fill(window) }
@@ -48,55 +54,119 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         return window
     }
 
-    /// Builds the window's content in the current language.
-    private func fill(_ window: NSWindow) {
-        window.title = L("Settings")
-        activityCheckboxes = []
+    private enum Tab: Int { case general, smartPause, schedule }
 
-        let rows: [[NSView]] = [
-            [label(L("Remind me every")), popup(.work)],
-            [label(L("Break length")), popup(.breakLength)],
-            [label(L("Warn me before breaks")), popup(.warn)],
-            [label(L("Pause when away after")), popup(.idle)],
-            [label(""), hint(L("No keyboard, mouse or trackpad input for this long stops the countdown."))],
-        ] + Activity.allCases.enumerated().map { index, activity in
-            [label(index == 0 ? L("Keep counting during") : ""), activityCheckbox(activity)]
-        } + [
-            [label(""), hint(L("Calls are noticed by the microphone or camera being in use, videos by an app keeping the screen awake. Keep-awake apps count as a video."))],
-            [label(L("During calls")), holdBreaksCheckbox()],
-            [label(""), hint(L("A break that comes due during a call waits until it ends."))],
-            [label(L("Sounds")), soundsCheckbox()],
-            [label(L("Volume")), volumeSlider()],
-            [label(""), hint(L("A soft chime for the heads-up, the start of a break and its end."))],
-            [label(L("Language")), languagePopup()],
-            [label(""), launchAtLoginCheckbox()],
-        ]
+    /// Builds the window's content in the current language, keeping the selected tab.
+    private func fill(_ window: NSWindow) {
+        let selected = (window.contentViewController as? NSTabViewController)?.selectedTabViewItemIndex ?? 0
+        activityCheckboxes = []
+        focusAppList = nil
+        plannedList = nil
+        workHourControls = []
+
+        let tabs = SettingsTabs()
+        tabs.tabStyle = .toolbar
+        for tab in [Tab.general, .smartPause, .schedule] {
+            let item = NSTabViewItem(viewController: page(tab))
+            switch tab {
+            case .general:
+                item.label = L("General")
+                item.image = NSImage(systemSymbolName: "gearshape", accessibilityDescription: nil)
+            case .smartPause:
+                item.label = L("Smart Pause")
+                item.image = NSImage(systemSymbolName: "pause.circle", accessibilityDescription: nil)
+            case .schedule:
+                item.label = L("Schedule")
+                item.image = NSImage(systemSymbolName: "calendar", accessibilityDescription: nil)
+            }
+            tabs.addTabViewItem(item)
+        }
+        tabs.selectedTabViewItemIndex = min(selected, tabs.tabViewItems.count - 1)
+        window.contentViewController = tabs
+        tabs.fitWindow(animated: false)
+    }
+
+    private func page(_ tab: Tab) -> NSViewController {
+        let rows: [[NSView]]
+        /// Extra room above some rows, to group them.
+        var gaps: [Int: CGFloat] = [:]
+        var header: NSView?
+        switch tab {
+        case .general:
+            header = brandHeader()
+            rows = [
+                [label(L("Remind me every")), popup(.work)],
+                [label(L("Break length")), popup(.breakLength)],
+                [label(L("Warn me before breaks")), popup(.warn)],
+                [label(L("Sounds")), soundsCheckbox()],
+                [label(L("Volume")), volumeSlider()],
+                [label(""), hint(L("A soft chime for the heads-up, the start of a break and its end."))],
+                [label(L("Language")), languagePopup()],
+                [label(""), launchAtLoginCheckbox()],
+            ]
+            gaps = [3: 14, 6: 14]
+        case .smartPause:
+            let activities = Activity.allCases.enumerated().map { index, activity in
+                [label(index == 0 ? L("Keep counting during") : ""), activityCheckbox(activity)]
+            }
+            rows = [
+                [label(L("Pause when away after")), popup(.idle)],
+                [label(""), hint(L("No keyboard, mouse or trackpad input for this long stops the countdown."))],
+            ] + activities + [
+                [label(""), hint(L("Calls are noticed by the microphone or camera being in use, videos by an app keeping the screen awake. Keep-awake apps count as a video."))],
+                [label(L("Hold breaks")), holdCheckbox(L("During calls and meetings"), on: Settings.holdBreaksDuringCalls,
+                                                       action: #selector(toggleHoldBreaks(_:)))],
+                [label(""), holdCheckbox(L("While I'm typing or dragging"), on: Settings.holdBreaksWhileTyping,
+                                         action: #selector(toggleHoldWhileTyping(_:)))],
+                [label(""), holdCheckbox(L("While an app is in full screen"), on: Settings.holdBreaksInFullScreen,
+                                         action: #selector(toggleHoldInFullScreen(_:)))],
+                [label(L("Focus apps")), focusAppsView()],
+                [label(""), hint(L("A break that comes due waits until the call ends or you leave the app. Typing holds it for up to a minute, until you pause."))],
+            ]
+            gaps = [2: 6, 2 + activities.count + 1: 14, rows.count - 2: 10]
+        case .schedule:
+            rows = [
+                [label(L("Work hours")), holdCheckbox(L("Only remind me during work hours"), on: Settings.workHoursOn,
+                                                      action: #selector(toggleWorkHours(_:)))],
+                [label(L("Days")), workDaysControl()],
+                [label(L("Hours")), workHoursControl()],
+                [label(""), hint(L("Outside these hours Sway stays quiet. When they begin, a fresh countdown starts."))],
+                [label(L("Planned breaks")), plannedBreaksView()],
+                [label(""), hint(L("Each starts at its time with its own name and length, and gets a heads-up like other breaks. One whose time passes while you're away is skipped."))],
+            ]
+            gaps = [4: 14]
+            for control in workHourControls { control.isEnabled = Settings.workHoursOn }
+        }
+
         let grid = NSGridView(views: rows)
         grid.rowSpacing = 10
         grid.columnSpacing = 12
         grid.column(at: 0).xPlacement = .trailing
         grid.rowAlignment = .firstBaseline
-        // Extra room before the activities, the calls section, the sounds and the general rows.
-        grid.row(at: 5).topPadding = 6
-        grid.row(at: rows.count - 7).topPadding = 14
-        grid.row(at: rows.count - 5).topPadding = 14
-        grid.row(at: rows.count - 2).topPadding = 14
+        for (row, gap) in gaps { grid.row(at: row).topPadding = gap }
+        grid.translatesAutoresizingMaskIntoConstraints = false
 
         let container = NSView()
-        let header = brandHeader()
-        grid.translatesAutoresizingMaskIntoConstraints = false
-        container.addSubview(header)
         container.addSubview(grid)
-        NSLayoutConstraint.activate([
-            header.topAnchor.constraint(equalTo: container.topAnchor, constant: 20),
-            header.centerXAnchor.constraint(equalTo: container.centerXAnchor),
-            grid.topAnchor.constraint(equalTo: header.bottomAnchor, constant: 24),
+        var constraints = [
             grid.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -24),
             grid.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 32),
             grid.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -32),
-        ])
-        window.contentView = container
-        window.setContentSize(container.fittingSize)
+        ]
+        if let header {
+            container.addSubview(header)
+            constraints += [
+                header.topAnchor.constraint(equalTo: container.topAnchor, constant: 20),
+                header.centerXAnchor.constraint(equalTo: container.centerXAnchor),
+                grid.topAnchor.constraint(equalTo: header.bottomAnchor, constant: 24),
+            ]
+        } else {
+            constraints.append(grid.topAnchor.constraint(equalTo: container.topAnchor, constant: 24))
+        }
+        NSLayoutConstraint.activate(constraints)
+        let controller = NSViewController()
+        controller.view = container
+        return controller
     }
 
     // MARK: Controls
@@ -198,11 +268,47 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         return checkbox
     }
 
-    private func holdBreaksCheckbox() -> NSButton {
-        let checkbox = NSButton(checkboxWithTitle: L("Hold breaks until the call ends"), target: self,
-                                action: #selector(toggleHoldBreaks(_:)))
-        checkbox.state = Settings.holdBreaksDuringCalls ? .on : .off
+    private func holdCheckbox(_ title: String, on: Bool, action: Selector) -> NSButton {
+        let checkbox = NSButton(checkboxWithTitle: title, target: self, action: action)
+        checkbox.state = on ? .on : .off
         return checkbox
+    }
+
+    /// The apps that hold breaks while in front, each with a remove button, then an Add button.
+    private var focusAppList: NSStackView?
+
+    private func focusAppsView() -> NSView {
+        let list = NSStackView()
+        list.orientation = .vertical
+        list.alignment = .leading
+        list.spacing = 6
+        focusAppList = list
+        reloadFocusApps()
+        return list
+    }
+
+    private func reloadFocusApps() {
+        guard let list = focusAppList else { return }
+        list.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        for (index, id) in Settings.focusApps.enumerated() {
+            let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: id)
+            let icon = NSImageView(image: url.map { NSWorkspace.shared.icon(forFile: $0.path) } ?? NSImage())
+            icon.widthAnchor.constraint(equalToConstant: 18).isActive = true
+            icon.heightAnchor.constraint(equalToConstant: 18).isActive = true
+            let name = NSTextField(labelWithString: url.map { FileManager.default.displayName(atPath: $0.path) } ?? id)
+            let remove = NSButton(image: NSImage(systemSymbolName: "minus.circle.fill", accessibilityDescription: L("Remove"))!,
+                                  target: self, action: #selector(removeFocusApp(_:)))
+            remove.isBordered = false
+            remove.contentTintColor = .secondaryLabelColor
+            remove.tag = index
+            let row = NSStackView(views: [icon, name, remove])
+            row.spacing = 6
+            list.addArrangedSubview(row)
+        }
+        let add = NSButton(title: L("Add App…"), target: self, action: #selector(addFocusApp))
+        add.controlSize = .small
+        list.addArrangedSubview(add)
+        (window?.contentViewController as? SettingsTabs)?.fitWindow(animated: true)
     }
 
     private var volume: NSSlider?
@@ -230,6 +336,107 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         let row = NSStackView(views: [speaker("speaker.fill"), slider, speaker("speaker.wave.3.fill")])
         row.spacing = 6
         return row
+    }
+
+    /// The days and hours pickers, which only apply while work hours are on.
+    private var workHourControls: [NSControl] = []
+
+    /// One toggle per weekday, starting on the calendar's first day of the week.
+    private func workDaysControl() -> NSSegmentedControl {
+        var calendar = Calendar.current
+        calendar.locale = appLocale
+        let days = (0..<7).map { (calendar.firstWeekday - 1 + $0) % 7 + 1 }
+        let control = NSSegmentedControl(labels: days.map { calendar.veryShortStandaloneWeekdaySymbols[$0 - 1] },
+                                         trackingMode: .selectAny, target: self, action: #selector(workDaysChanged(_:)))
+        for (index, day) in days.enumerated() {
+            control.setTag(day, forSegment: index)
+            control.setWidth(30, forSegment: index)
+            control.setSelected(Settings.workDays.contains(day), forSegment: index)
+            control.setToolTip(calendar.standaloneWeekdaySymbols[day - 1], forSegment: index)
+        }
+        workHourControls.append(control)
+        return control
+    }
+
+    /// "9:00 to 18:00", as two time pickers.
+    private func workHoursControl() -> NSView {
+        let start = timePicker(minutes: Settings.workStart, action: #selector(workStartChanged(_:)))
+        let end = timePicker(minutes: Settings.workEnd, action: #selector(workEndChanged(_:)))
+        workHourControls += [start, end]
+        let row = NSStackView(views: [start, NSTextField(labelWithString: L("to")), end])
+        row.spacing = 8
+        return row
+    }
+
+    private func timePicker(minutes: Int, action: Selector) -> NSDatePicker {
+        let picker = NSDatePicker()
+        picker.datePickerStyle = .textFieldAndStepper
+        picker.datePickerElements = .hourMinute
+        picker.locale = appLocale
+        picker.dateValue = Calendar.current.date(bySettingHour: minutes / 60, minute: minutes % 60, second: 0, of: Date()) ?? Date()
+        picker.target = self
+        picker.action = action
+        return picker
+    }
+
+    private static func minutes(of picker: NSDatePicker) -> Int {
+        let parts = Calendar.current.dateComponents([.hour, .minute], from: picker.dateValue)
+        return (parts.hour ?? 0) * 60 + (parts.minute ?? 0)
+    }
+
+    /// Planned breaks, one row each (name, time, length, remove), then an Add button.
+    private var plannedList: NSStackView?
+    private static let plannedLengths = [5, 10, 15, 20, 30, 45, 60, 90]
+
+    private func plannedBreaksView() -> NSView {
+        let list = NSStackView()
+        list.orientation = .vertical
+        list.alignment = .leading
+        list.spacing = 8
+        plannedList = list
+        reloadPlannedBreaks()
+        return list
+    }
+
+    private func reloadPlannedBreaks() {
+        guard let list = plannedList else { return }
+        list.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        for (index, planned) in Settings.plannedBreaks.enumerated() {
+            let name = NSTextField(string: planned.title)
+            name.placeholderString = L("Name")
+            name.widthAnchor.constraint(equalToConstant: 110).isActive = true
+            name.cell?.sendsActionOnEndEditing = true
+            name.target = self
+            name.action = #selector(plannedNameChanged(_:))
+            name.tag = index
+
+            let time = timePicker(minutes: planned.start, action: #selector(plannedTimeChanged(_:)))
+            time.tag = index
+
+            let length = NSPopUpButton()
+            for minutes in (Self.plannedLengths + [planned.length]).reduce(into: [Int](), { if !$0.contains($1) { $0.append($1) } }).sorted() {
+                length.addItem(withTitle: Self.format(minutes * 60))
+                length.lastItem?.tag = minutes
+            }
+            length.selectItem(withTag: planned.length)
+            length.target = self
+            length.action = #selector(plannedLengthChanged(_:))
+            length.tag = index
+
+            let remove = NSButton(image: NSImage(systemSymbolName: "minus.circle.fill", accessibilityDescription: L("Remove"))!,
+                                  target: self, action: #selector(removePlannedBreak(_:)))
+            remove.isBordered = false
+            remove.contentTintColor = .secondaryLabelColor
+            remove.tag = index
+
+            let row = NSStackView(views: [name, time, NSTextField(labelWithString: L("for")), length, remove])
+            row.spacing = 6
+            list.addArrangedSubview(row)
+        }
+        let add = NSButton(title: L("Add Break"), target: self, action: #selector(addPlannedBreak))
+        add.controlSize = .small
+        list.addArrangedSubview(add)
+        (window?.contentViewController as? SettingsTabs)?.fitWindow(animated: true)
     }
 
     private func launchAtLoginCheckbox() -> NSButton {
@@ -299,6 +506,96 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         onChanged()
     }
 
+    @objc private func toggleWorkHours(_ checkbox: NSButton) {
+        Settings.workHoursOn = checkbox.state == .on
+        for control in workHourControls { control.isEnabled = Settings.workHoursOn }
+        onChanged()
+    }
+
+    @objc private func workDaysChanged(_ control: NSSegmentedControl) {
+        Settings.workDays = (0..<control.segmentCount).filter { control.isSelected(forSegment: $0) }
+            .map { control.tag(forSegment: $0) }.sorted()
+        onChanged()
+    }
+
+    @objc private func workStartChanged(_ picker: NSDatePicker) {
+        Settings.workStart = Self.minutes(of: picker)
+        onChanged()
+    }
+
+    @objc private func workEndChanged(_ picker: NSDatePicker) {
+        Settings.workEnd = Self.minutes(of: picker)
+        onChanged()
+    }
+
+    /// The first planned break suggests lunch; later ones an afternoon walk.
+    @objc private func addPlannedBreak() {
+        let first = Settings.plannedBreaks.isEmpty
+        Settings.plannedBreaks.append(first ? PlannedBreak(title: L("Lunch"), start: 12 * 60 + 30, length: 60)
+                                            : PlannedBreak(title: L("Walk"), start: 15 * 60 + 30, length: 15))
+        reloadPlannedBreaks()
+        onChanged()
+    }
+
+    @objc private func removePlannedBreak(_ sender: NSButton) {
+        guard Settings.plannedBreaks.indices.contains(sender.tag) else { return }
+        Settings.plannedBreaks.remove(at: sender.tag)
+        reloadPlannedBreaks()
+        onChanged()
+    }
+
+    @objc private func plannedNameChanged(_ field: NSTextField) {
+        let name = field.stringValue.trimmingCharacters(in: .whitespaces)
+        editPlanned(field.tag) { $0.title = name.isEmpty ? L("Break") : name }
+    }
+
+    @objc private func plannedTimeChanged(_ picker: NSDatePicker) {
+        editPlanned(picker.tag) { $0.start = Self.minutes(of: picker) }
+    }
+
+    @objc private func plannedLengthChanged(_ popup: NSPopUpButton) {
+        editPlanned(popup.tag) { $0.length = popup.selectedTag() }
+    }
+
+    private func editPlanned(_ index: Int, _ change: (inout PlannedBreak) -> Void) {
+        var all = Settings.plannedBreaks
+        guard all.indices.contains(index) else { return }
+        change(&all[index])
+        Settings.plannedBreaks = all
+        onChanged()
+    }
+
+    @objc private func toggleHoldWhileTyping(_ checkbox: NSButton) {
+        Settings.holdBreaksWhileTyping = checkbox.state == .on
+    }
+
+    @objc private func toggleHoldInFullScreen(_ checkbox: NSButton) {
+        Settings.holdBreaksInFullScreen = checkbox.state == .on
+    }
+
+    @objc private func addFocusApp() {
+        guard let window else { return }
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [.application]
+        panel.allowsMultipleSelection = true
+        panel.directoryURL = URL(fileURLWithPath: "/Applications")
+        panel.prompt = L("Add")
+        panel.beginSheetModal(for: window) { [weak self] response in
+            MainActor.assumeIsolated {
+                guard response == .OK else { return }
+                let ids = panel.urls.compactMap { Bundle(url: $0)?.bundleIdentifier }
+                Settings.focusApps += ids.filter { !Settings.focusApps.contains($0) }
+                self?.reloadFocusApps()
+            }
+        }
+    }
+
+    @objc private func removeFocusApp(_ sender: NSButton) {
+        guard Settings.focusApps.indices.contains(sender.tag) else { return }
+        Settings.focusApps.remove(at: sender.tag)
+        reloadFocusApps()
+    }
+
     @objc private func toggleSounds(_ checkbox: NSButton) {
         Settings.playSounds = checkbox.state == .on
         volume?.isEnabled = Settings.playSounds
@@ -353,5 +650,22 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         case ..<60: L("%d sec", seconds)
         default: L("%d min", seconds / 60)
         }
+    }
+}
+
+/// Toolbar-style tabs that resize the window to fit each tab, keeping its top edge in place.
+private final class SettingsTabs: NSTabViewController {
+    override func tabView(_ tabView: NSTabView, didSelect tabViewItem: NSTabViewItem?) {
+        super.tabView(tabView, didSelect: tabViewItem)
+        fitWindow(animated: true)
+    }
+
+    func fitWindow(animated: Bool) {
+        guard let window = view.window, let content = tabViewItems[selectedTabViewItemIndex].viewController?.view else { return }
+        content.layoutSubtreeIfNeeded()
+        let size = content.fittingSize
+        var frame = window.frameRect(forContentRect: NSRect(origin: .zero, size: size))
+        frame.origin = NSPoint(x: window.frame.minX, y: window.frame.maxY - frame.height)
+        window.setFrame(frame, display: true, animate: animated && window.isVisible)
     }
 }

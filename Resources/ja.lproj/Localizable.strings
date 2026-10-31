@@ -58,7 +58,6 @@
 "That counts as a break, so the timer started over." = "休憩とみなして、タイマーをリセットしました。";
 
 /* Settings window */
-"Settings" = "設定";
 "Settings…" = "設定…";
 "Pause when away after" = "離席とみなすまでの時間";
 "No keyboard, mouse or trackpad input for this long stops the countdown." = "この時間キーボード、マウス、トラックパッドの操作がないとカウントダウンが止まります。";
@@ -97,9 +96,6 @@
 "Calls are noticed by the microphone or camera being in use, videos by an app keeping the screen awake. Keep-awake apps count as a video." = "通話はマイクまたはカメラの使用で、ビデオは画面をスリープさせないアプリで検出します。画面をスリープさせないアプリはビデオとして扱われます。";
 "After the call" = "通話のあと";
 "Next break" = "次の休憩";
-"A break that comes due during a call waits until it ends." = "通話中に休憩の時間になった場合は、通話が終わるまで待ちます。";
-"During calls" = "通話中";
-"Hold breaks until the call ends" = "通話が終わるまで休憩を待つ";
 
 /* Welcome window */
 "Welcome to Sway" = "Swayへようこそ";
@@ -118,3 +114,38 @@
 "Play sounds for breaks" = "休憩時にサウンドを再生";
 "Volume" = "音量";
 "A soft chime for the heads-up, the start of a break and its end." = "予告時、休憩の開始時と終了時にやさしい音が鳴ります。";
+
+"In a moment" = "まもなく";
+"After %@" = "%@のあと";
+"General" = "一般";
+"Smart Pause" = "スマート一時停止";
+"Schedule" = "スケジュール";
+"Hold breaks" = "休憩を保留";
+"During calls and meetings" = "通話・会議中";
+"While I'm typing or dragging" = "入力中またはドラッグ中";
+"While an app is in full screen" = "アプリがフルスクリーンのとき";
+"Focus apps" = "集中アプリ";
+"Add App…" = "アプリを追加…";
+"Add" = "追加";
+"Remove" = "削除";
+"A break that comes due waits until the call ends or you leave the app. Typing holds it for up to a minute, until you pause." = "休憩の時間になっても、通話が終わるかアプリを離れるまで待ちます。入力中は、手が止まるまで最大1分待ちます。";
+"Work hours" = "勤務時間";
+"Only remind me during work hours" = "勤務時間中だけ通知する";
+"Days" = "曜日";
+"Hours" = "時間";
+"to" = "〜";
+"Outside these hours Sway stays quiet. When they begin, a fresh countdown starts." = "勤務時間外は Sway は通知しません。勤務時間が始まると、新しいカウントダウンが始まります。";
+"Planned breaks" = "予定の休憩";
+"Name" = "名前";
+"for" = "から";
+"Add Break" = "休憩を追加";
+"Lunch" = "昼食";
+"Walk" = "散歩";
+"Break" = "休憩";
+"Each starts at its time with its own name and length, and gets a heads-up like other breaks. One whose time passes while you're away is skipped." = "それぞれ設定した時刻に、独自の名前と長さで始まり、ほかの休憩と同じく予告されます。離席中に時刻が過ぎた場合はスキップされます。";
+"Off hours" = "勤務時間外";
+"Outside work hours" = "勤務時間外です";
+"Back at %@" = "%@に再開";
+"Back %@" = "%@に再開";
+"Start reminders anyway" = "それでも通知する";
+"%@ in" = "%@まで";

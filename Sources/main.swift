@@ -42,6 +42,61 @@ enum Settings {
         set { defaults.set(newValue, forKey: "holdBreaksDuringCalls") }
     }
 
+    /// Whether a break that comes due while you're typing or dragging waits for a short pause.
+    static var holdBreaksWhileTyping: Bool {
+        get { defaults.object(forKey: "holdBreaksWhileTyping") as? Bool ?? true }
+        set { defaults.set(newValue, forKey: "holdBreaksWhileTyping") }
+    }
+
+    /// Whether a break waits while the app in front is in full screen. Off by default, since
+    /// some people work in full screen all day.
+    static var holdBreaksInFullScreen: Bool {
+        get { defaults.bool(forKey: "holdBreaksInFullScreen") }
+        set { defaults.set(newValue, forKey: "holdBreaksInFullScreen") }
+    }
+
+    /// Bundle identifiers of apps that hold a break while they're in front.
+    static var focusApps: [String] {
+        get { defaults.stringArray(forKey: "focusApps") ?? [] }
+        set { defaults.set(newValue, forKey: "focusApps") }
+    }
+
+    /// Whether Sway only runs during the work days and hours below.
+    static var workHoursOn: Bool {
+        get { defaults.bool(forKey: "workHoursOn") }
+        set { defaults.set(newValue, forKey: "workHoursOn") }
+    }
+
+    /// Work days as `Calendar` weekdays (1 is Sunday); Monday to Friday by default.
+    static var workDays: [Int] {
+        get { defaults.array(forKey: "workDays") as? [Int] ?? [2, 3, 4, 5, 6] }
+        set { defaults.set(newValue, forKey: "workDays") }
+    }
+
+    /// Start and end of work hours, in minutes after midnight.
+    static var workStart: Int {
+        get { defaults.object(forKey: "workStart") as? Int ?? 9 * 60 }
+        set { defaults.set(newValue, forKey: "workStart") }
+    }
+
+    static var workEnd: Int {
+        get { defaults.object(forKey: "workEnd") as? Int ?? 18 * 60 }
+        set { defaults.set(newValue, forKey: "workEnd") }
+    }
+
+    /// Breaks at set times of day.
+    static var plannedBreaks: [PlannedBreak] {
+        get { defaults.data(forKey: "plannedBreaks").flatMap { try? JSONDecoder().decode([PlannedBreak].self, from: $0) } ?? [] }
+        set { defaults.set(try? JSONEncoder().encode(newValue), forKey: "plannedBreaks") }
+    }
+
+    /// When each planned break (by id) last started or was skipped, so it happens once a day,
+    /// even across a relaunch.
+    static var plannedBreaksDone: [String: Date] {
+        get { defaults.dictionary(forKey: "plannedBreaksDone") as? [String: Date] ?? [:] }
+        set { defaults.set(newValue, forKey: "plannedBreaksDone") }
+    }
+
     /// Chimes for the heads-up, the start of a break and its end.
     static var playSounds: Bool {
         get { defaults.object(forKey: "playSounds") as? Bool ?? true }
@@ -102,7 +157,8 @@ func secondsSinceLastInput() -> TimeInterval {
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     /// `away`: no input for a while, so the work countdown is frozen until you're back.
-    enum Phase { case working, onBreak, breakOver, paused, away }
+    /// `offHours`: outside work hours, so there's no countdown until they begin.
+    enum Phase { case working, onBreak, breakOver, paused, away, offHours }
 
     private let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
     private let overlay = BreakOverlay()
@@ -124,6 +180,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     /// The Mac slept or the screen locked since you last came back, which counts as a break.
     private var sleptOrLocked = false
     private var warnedThisCycle = false
+    /// What's keeping a break that's due from starting, and since when.
+    private var hold: Hold?
+    private var heldSince = Date()
+    /// How far snoozes pushed each planned break (by id) today.
+    private var plannedSnoozes: [UUID: TimeInterval] = [:]
+    /// The planned break the heads-up was last shown for.
+    private var warnedPlanned: UUID?
+    /// Planned breaks whose time came while you were working, waiting to start.
+    private var plannedPending: Set<UUID> = []
+    /// The planned break on screen, if the current break is one.
+    private var currentPlanned: PlannedBreak?
+    /// The previous tick, to notice a planned break's time passing (and sleep, as a long gap).
+    private var lastTick = Date()
+    /// "Start reminders anyway" outside work hours lasts until this time.
+    private var offHoursOverride = Date.distantPast
     /// When a call, video or other activity that keeps the countdown running was last seen.
     private var lastBusy = Date.distantPast
     /// Your last input, for noticing the first return of a new day.
@@ -139,7 +210,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         overlay.onEnd = { [unowned self] in startWork() }
-        overlay.onPostpone = { [unowned self] minutes in startWork(after: minutes * 60) }
+        overlay.onPostpone = { [unowned self] minutes in postpone(minutes: minutes) }
         connectWarning()
         settings.onWorkChanged = { [unowned self] in startWork() }
         settings.onChanged = { [unowned self] in updateDisplay() }
@@ -188,16 +259,29 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     private func connectWarning() {
-        warning.onStartNow = { [unowned self] in startBreak() }
+        warning.onStartNow = { [unowned self] in startBreak(planned: nextBreak.planned) }
         warning.onSnooze = { [unowned self] minutes in addTime(minutes: minutes) }
     }
 
     // MARK: Timer
 
+    /// Outside work hours (when they're on), unless you asked for reminders anyway.
+    private var isOffHours: Bool {
+        Settings.workHoursOn && !WorkHours.contains(Date()) && offHoursOverride <= Date()
+    }
+
     private func startWork(after seconds: Int? = nil) {
         overlay.close()
         warning.close()
         awayNotice.close()
+        hold = nil
+        currentPlanned = nil
+        // Every path back to work goes through here, so this is the one place that checks the hours.
+        if isOffHours {
+            phase = .offHours
+            updateDisplay()
+            return
+        }
         phase = .working
         let cycle = seconds ?? workSeconds
         cycleStart = Date()
@@ -207,12 +291,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         updateDisplay()
     }
 
-    private func startBreak() {
+    /// Starts `planned` with its own name and length, or a regular break.
+    private func startBreak(planned: PlannedBreak? = nil) {
         warning.close()
         greeting.close()
         phase = .onBreak
-        deadline = Date().addingTimeInterval(TimeInterval(breakSeconds))
-        overlay.show(duration: TimeInterval(breakSeconds))
+        hold = nil
+        if let planned { markDone(planned) }
+        currentPlanned = planned
+        let length = planned.map { TimeInterval($0.length * 60) } ?? TimeInterval(breakSeconds)
+        deadline = Date().addingTimeInterval(length)
+        overlay.show(duration: length, title: planned?.title)
         Sound.breakStart.play()
         updateDisplay()
     }
@@ -224,6 +313,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             if input < 2, greetIfNewDay() { return }
             if phase != .working { noteActivity(at: Date().addingTimeInterval(-input)) }
         }
+        // Work hours ending stops the countdown; their start begins a fresh one.
+        switch phase {
+        case .working, .away: if isOffHours { startWork(); return }
+        case .offHours: if !isOffHours { startWork(); return }
+        case .onBreak, .breakOver, .paused: break
+        }
+        checkPlannedTimes()
         switch phase {
         case .working:
             let idle = idleSeconds > 0 ? idleTime(input: input) : input
@@ -232,20 +328,26 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 goAway(idle: idle)
                 return
             }
-            let remaining = deadline.timeIntervalSinceNow
+            let next = nextBreak
+            let remaining = next.date.timeIntervalSinceNow
             if remaining <= 0 {
-                // A break that comes due during a call waits until the call ends.
-                if Settings.holdBreaksDuringCalls, Activity.calls.isHappening {
+                // A break that comes due during a call, while typing or in a focus app waits a bit.
+                if hold == nil { heldSince = Date() }
+                hold = Hold.current(waited: Date().timeIntervalSince(heldSince))
+                if hold != nil {
                     warning.close()
                     updateDisplay()
                 } else {
-                    startBreak()
+                    startBreak(planned: next.planned)
                 }
                 return
             }
-            if !warnedThisCycle, warnSeconds > 0, remaining <= TimeInterval(warnSeconds),
+            hold = nil
+            // Each planned break gets its own heads-up, apart from the regular cycle's.
+            let warned = next.planned.map { $0.id == warnedPlanned } ?? warnedThisCycle
+            if !warned, warnSeconds > 0, remaining <= TimeInterval(warnSeconds),
                let button = statusItem.button {
-                warnedThisCycle = true
+                if let planned = next.planned { warnedPlanned = planned.id } else { warnedThisCycle = true }
                 warning.show(relativeTo: button, remaining: remaining)
                 Sound.headsUp.play()
             } else if warning.isShown {
@@ -267,9 +369,80 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         case .away:
             // Behind the lock screen the notice would go unseen, so wait for the unlock.
             if !screenLocked, input < 2 { comeBack() }
-        case .breakOver, .paused:
+        case .breakOver, .paused, .offHours:
             break
         }
+    }
+
+    // MARK: Planned breaks
+
+    private func due(_ planned: PlannedBreak) -> Date? {
+        planned.due(on: Date(), snoozed: plannedSnoozes[planned.id] ?? 0)
+    }
+
+    /// A planned break becomes due only when a tick sees its time pass, so adding one for a time
+    /// that's already gone, or relaunching after it, doesn't start it. If its time passes while
+    /// the Mac sleeps, or you're away, paused or outside work hours, it's skipped. During another
+    /// break it waits and starts right after.
+    private func checkPlannedTimes() {
+        let now = Date()
+        let slept = now.timeIntervalSince(lastTick) > 5
+        let previous = lastTick
+        lastTick = now
+        for planned in Settings.plannedBreaks where !isDone(planned) {
+            guard let due = due(planned) else { continue }
+            if plannedPending.contains(planned.id) {
+                // Held for over an hour, e.g. by a long call: too late now.
+                if due < now.addingTimeInterval(-PlannedBreak.grace) { markDone(planned) }
+            } else if due > previous, due <= now {
+                if slept || [.away, .paused, .offHours].contains(phase) {
+                    markDone(planned)
+                } else {
+                    plannedPending.insert(planned.id)
+                }
+            }
+        }
+    }
+
+    /// The next break: the regular countdown's, or a planned one that's due or comes first.
+    private var nextBreak: (date: Date, planned: PlannedBreak?) {
+        let now = Date()
+        let planned = Settings.plannedBreaks.compactMap { planned -> (Date, PlannedBreak)? in
+            guard !isDone(planned), let due = due(planned) else { return nil }
+            if plannedPending.contains(planned.id) { return (min(due, now), planned) }
+            return due > now ? (due, planned) : nil
+        }.min { $0.0 < $1.0 }
+        if let (due, next) = planned, due < deadline { return (due, next) }
+        return (deadline, nil)
+    }
+
+    /// Moves `planned` to start at `date` instead.
+    private func reschedule(_ planned: PlannedBreak, to date: Date) {
+        guard let base = planned.due(on: Date(), snoozed: 0) else { return }
+        plannedSnoozes[planned.id] = date.timeIntervalSince(base)
+        plannedPending.remove(planned.id)
+    }
+
+    /// The break screen's +1/+3/+5 min: a planned break comes back later as itself.
+    private func postpone(minutes: Int) {
+        guard let planned = currentPlanned else {
+            startWork(after: minutes * 60)
+            return
+        }
+        Settings.plannedBreaksDone[planned.id.uuidString] = nil
+        warnedPlanned = nil
+        reschedule(planned, to: Date().addingTimeInterval(TimeInterval(minutes * 60)))
+        startWork()
+    }
+
+    private func isDone(_ planned: PlannedBreak) -> Bool {
+        Settings.plannedBreaksDone[planned.id.uuidString].map(Calendar.current.isDateInToday) ?? false
+    }
+
+    private func markDone(_ planned: PlannedBreak) {
+        Settings.plannedBreaksDone[planned.id.uuidString] = Date()
+        plannedSnoozes[planned.id] = nil
+        plannedPending.remove(planned.id)
     }
 
     /// Time without input, minus the time spent in a call, watching a video or similar, so
@@ -294,6 +467,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     /// the timer was left in. Days roll over at 4 AM, so working past midnight doesn't count.
     private func greetIfNewDay() -> Bool {
         let now = Date()
+        // Outside work hours there's no countdown to announce.
+        if isOffHours { return false }
         let rollover: TimeInterval = 4 * 3600
         guard !Calendar.current.isDate(lastActive.addingTimeInterval(-rollover),
                                        inSameDayAs: now.addingTimeInterval(-rollover)),
@@ -315,6 +490,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         warning.close()
         awaySince = Date().addingTimeInterval(-idle)
         pausedRemaining = max(1, deadline.timeIntervalSinceNow + idle)
+        hold = nil
         phase = .away
         updateDisplay()
     }
@@ -369,39 +545,42 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         switch phase {
         case .working: startWork()
         case .away: comeBack()
-        case .onBreak, .breakOver, .paused: break
+        case .onBreak, .breakOver, .paused, .offHours: break
         }
         sleptOrLocked = false
     }
 
     // MARK: Menu
 
-    private var remainingSeconds: Int { max(0, Int(deadline.timeIntervalSinceNow.rounded(.up))) }
+    private var remainingSeconds: Int { secondsUntil(deadline) }
+
+    private func secondsUntil(_ date: Date) -> Int { max(0, Int(date.timeIntervalSinceNow.rounded(.up))) }
 
     private func updateDisplay() {
         let title: String
         switch phase {
-        case .working: title = waitingForCall ? L("After the call") : short(remainingSeconds)
+        case .working: title = heldBreak?.title ?? short(secondsUntil(nextBreak.date))
         case .onBreak: title = L("Break %@", short(remainingSeconds))
         case .breakOver: title = L("Break done")
         case .paused: title = L("Paused %@", short(Int(pausedRemaining)))
         case .away: title = short(Int(pausedRemaining))
+        case .offHours: title = L("Off hours")
         }
         statusItem.button?.title = " " + title
-        let image = phase == .paused || phase == .away ? SwayMark.pausedMenuBarImage : SwayMark.menuBarImage
+        let image = [.paused, .away, .offHours].contains(phase) ? SwayMark.pausedMenuBarImage : SwayMark.menuBarImage
         if statusItem.button?.image !== image { statusItem.button?.image = image }
         header?.update(headerState, animated: true)
     }
 
-    /// The countdown ran out during a call, so the break waits for the call to end.
-    private var waitingForCall: Bool { phase == .working && deadline.timeIntervalSinceNow <= 0 }
+    /// The countdown ran out, but a call, typing or a focus app holds the break back.
+    private var heldBreak: Hold? { phase == .working ? hold : nil }
 
     private var headerState: HeaderState {
         switch phase {
-        case .working where waitingForCall:
-            HeaderState(caption: L("Next break"), value: L("After the call"), showsAddTime: true, mascot: .focus)
+        case .working where heldBreak != nil:
+            HeaderState(caption: L("Next break"), value: heldBreak!.title, showsAddTime: true, mascot: .focus)
         case .working:
-            HeaderState(caption: L("Next break in"), value: clock(remainingSeconds), showsAddTime: true, mascot: .focus)
+            countdownHeader(nextBreak)
         case .onBreak:
             HeaderState(caption: L("On a break"), value: clock(remainingSeconds), showsAddTime: false, mascot: .stretching)
         case .breakOver:
@@ -410,7 +589,25 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             HeaderState(caption: L("%@ left", clock(Int(pausedRemaining))), value: L("Paused"), showsAddTime: true, mascot: .sleeping)
         case .away:
             HeaderState(caption: L("%@ left", clock(Int(pausedRemaining))), value: L("Away"), showsAddTime: true, mascot: .relaxed)
+        case .offHours:
+            HeaderState(caption: L("Outside work hours"), value: WorkHours.nextStart(after: Date()).map(backAt) ?? L("Off hours"),
+                        showsAddTime: false, mascot: .napping)
         }
+    }
+
+    /// "Next break in 24:13", or "Lunch in 4:59" when a planned break comes first.
+    private func countdownHeader(_ next: (date: Date, planned: PlannedBreak?)) -> HeaderState {
+        HeaderState(caption: next.planned.map { L("%@ in", $0.title) } ?? L("Next break in"),
+                    value: clock(secondsUntil(next.date)), showsAddTime: true, mascot: .focus)
+    }
+
+    /// "Back at 9:00", or with the weekday when that's not today, e.g. "Back Mon 9:00".
+    private func backAt(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = appLocale
+        let today = Calendar.current.isDateInToday(date)
+        formatter.setLocalizedDateFormatFromTemplate(today ? "jmm" : "EEEjmm")
+        return today ? L("Back at %@", formatter.string(from: date)) : L("Back %@", formatter.string(from: date))
     }
 
     func menuNeedsUpdate(_ menu: NSMenu) {
@@ -428,9 +625,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         case .onBreak: menu.addItem(item(L("End break now"), #selector(endBreak)))
         case .breakOver: menu.addItem(item(L("Back to work"), #selector(endBreak)))
         case .working, .paused, .away: menu.addItem(item(L("Take a break now"), #selector(breakNow)))
+        case .offHours: menu.addItem(item(L("Start reminders anyway"), #selector(remindAnyway)))
         }
-        menu.addItem(item(phase == .paused ? L("Resume") : L("Pause"), #selector(togglePause)))
-        menu.addItem(item(L("Restart timer"), #selector(restart)))
+        if phase != .offHours {
+            menu.addItem(item(phase == .paused ? L("Resume") : L("Pause"), #selector(togglePause)))
+            menu.addItem(item(L("Restart timer"), #selector(restart)))
+        }
         menu.addItem(.separator())
 
         menu.addItem(submenu(title: L("Remind me every"), symbol: "timer", options: SettingsWindow.workPresets,
@@ -510,6 +710,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let extra = TimeInterval(minutes * 60)
         switch phase {
         case .working:
+            // Snoozing just before a planned break moves that break instead of the regular one.
+            let next = nextBreak
+            if let planned = next.planned {
+                reschedule(planned, to: max(next.date, Date()).addingTimeInterval(extra))
+                if nextBreak.date.timeIntervalSinceNow > TimeInterval(warnSeconds) {
+                    warnedPlanned = nil
+                    warning.close()
+                }
+                break
+            }
             deadline += extra
             // Re-arm the warning if the extra time moved the break out of the warning window.
             if deadline.timeIntervalSinceNow > TimeInterval(warnSeconds) {
@@ -518,7 +728,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             }
         case .paused, .away:
             pausedRemaining += extra
-        case .onBreak, .breakOver:
+        case .onBreak, .breakOver, .offHours:
             return
         }
         statusItem.menu?.cancelTracking()
@@ -526,6 +736,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     @objc private func breakNow() { startBreak() }
+
+    /// Outside work hours, starts the countdown and keeps it going until work hours next begin.
+    @objc private func remindAnyway() {
+        offHoursOverride = WorkHours.nextStart(after: Date()) ?? .distantFuture
+        startWork()
+    }
     @objc private func endBreak() { startWork() }
     @objc private func restart() { startWork() }
     @objc private func quit() { NSApp.terminate(nil) }

@@ -30,6 +30,7 @@ final class BreakOverlay: NSObject {
     private var windows: [NSWindow] = []
     private var panels: [OverlayPanel] = []
     private var message = ""
+    private var title: String?
     private var total: TimeInterval = 1
     private var remaining: TimeInterval = 0
     private var finished = false
@@ -46,7 +47,9 @@ final class BreakOverlay: NSObject {
             name: NSApplication.didChangeScreenParametersNotification, object: nil)
     }
 
-    func show(duration: TimeInterval) {
+    /// `title` names a planned break, e.g. "Lunch"; regular breaks show "Time for a break".
+    func show(duration: TimeInterval, title: String? = nil) {
+        self.title = title
         message = L(peaceMessages.randomElement()!)
         total = max(1, duration)
         remaining = duration
@@ -139,7 +142,7 @@ final class BreakOverlay: NSObject {
     private func render(animated: Bool) {
         let progress = finished ? 1 : 1 - remaining / total
         for panel in panels {
-            panel.update(progress: progress, remaining: remaining, finished: finished, animated: animated)
+            panel.update(progress: progress, remaining: remaining, finished: finished, title: title, animated: animated)
         }
     }
 }
@@ -269,12 +272,12 @@ private final class OverlayPanel: BackdropView {
         Reveal.stagger(groups: [[titleLabel, ring, messageLabel], [snoozeRow, skipButton, lockButton]], after: start)
     }
 
-    func update(progress: Double, remaining: TimeInterval, finished: Bool, animated: Bool) {
+    func update(progress: Double, remaining: TimeInterval, finished: Bool, title: String?, animated: Bool) {
         self.finished = finished
         ring.setProgress(progress, animated: animated)
         let seconds = Int(remaining.rounded(.up))
         timeLabel.stringValue = finished ? "✓" : String(format: "%d:%02d", seconds / 60, seconds % 60)
-        titleLabel.stringValue = finished ? L("Break's over") : L("Time for a break")
+        titleLabel.stringValue = finished ? L("Break's over") : title ?? L("Time for a break")
         mascot.pose = finished ? .cheering : .stretching
         snoozeRow.isHidden = finished
         lockButton.isHidden = finished

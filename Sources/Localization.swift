@@ -16,8 +16,13 @@ private func bundle(for code: String?) -> Bundle {
     return bundle
 }
 
+/// The language's locale, keeping the Mac's region (and with it the clock and date habits)
+/// when the language doesn't name one, e.g. English with a 24-hour clock in Brazil.
 private func locale(for code: String?) -> Locale {
-    code.map { Locale(identifier: $0) } ?? .current
+    guard let code else { return .current }
+    var components = Locale.Components(identifier: code)
+    if components.region == nil { components.region = Locale.current.region }
+    return Locale(components: components)
 }
 
 /// Switches the app's language right away; nil follows the Mac's language.

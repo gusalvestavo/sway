@@ -37,7 +37,10 @@ Designed to encourage you to respect your time.
 - **A welcome on first launch** walks you through picking your work interval and break length in a few steps.
 - **Pauses while you're away**: after 30 seconds without keyboard, mouse or trackpad input the countdown stops (adjustable or off), and when you're back a popover says how long you were gone.
 - **Keeps counting through calls and videos**: with the microphone or camera in use, or an app keeping the screen awake for a video or slideshow, the countdown keeps going without input, and a break that comes due during a call waits until it ends. Each activity, plus music and other audio, can be turned on or off in Settings.
-- **Work interval and break length** right in the menu, and a **Settings window** (gear icon in the menu) for the work interval, break length, heads-up, away detection, sounds, language and *Launch at Login*, all saved between launches. Sleep or a locked screen counts as a break.
+- **Waits for a good moment**: a break that comes due while you're typing or dragging waits for a short pause (up to a minute), and one that comes due in a full-screen app or in a focus app you pick waits until you leave it. Each can be turned on or off.
+- **Work hours**: optionally, Sway only runs on the days and hours you work, stays quiet outside them and starts a fresh countdown when they begin. *Start reminders anyway* in the menu overrides it until the next workday.
+- **Planned breaks** at set times, such as lunch at 12:30 for an hour or a walk at 15:30, each with its own name and length and a heads-up like any other break.
+- **Work interval and break length** right in the menu, and a **Settings window** (gear icon in the menu) with *General* (work interval, break length, heads-up, sounds, language, *Launch at Login*), *Smart Pause* (away detection and when to hold breaks) and *Schedule* (work hours and planned breaks) tabs, all saved between launches. Sleep or a locked screen counts as a break.
 - Available in English, Português (Brasil), Español, Français, Deutsch, Italiano, 日本語, 한국어 and 简体中文, following your Mac's language or the one you pick in Settings.
 
 ## Requirements

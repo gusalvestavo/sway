@@ -58,7 +58,6 @@
 "That counts as a break, so the timer started over." = "Isso conta como um intervalo, então o timer recomeçou.";
 
 /* Settings window */
-"Settings" = "Ajustes";
 "Settings…" = "Ajustes…";
 "Pause when away after" = "Pausar quando ausente após";
 "No keyboard, mouse or trackpad input for this long stops the countdown." = "Sem uso de teclado, mouse ou trackpad por esse tempo, a contagem para.";
@@ -97,9 +96,6 @@
 "Calls are noticed by the microphone or camera being in use, videos by an app keeping the screen awake. Keep-awake apps count as a video." = "Chamadas são detectadas pelo microfone ou câmera em uso, e vídeos por um app mantendo a tela acesa. Apps que mantêm a tela acesa contam como vídeo.";
 "After the call" = "Após a chamada";
 "Next break" = "Próximo intervalo";
-"A break that comes due during a call waits until it ends." = "Um intervalo que chega durante uma chamada espera ela terminar.";
-"During calls" = "Durante chamadas";
-"Hold breaks until the call ends" = "Segurar intervalos até a chamada terminar";
 
 /* Welcome window */
 "Welcome to Sway" = "Boas-vindas ao Sway";
@@ -118,3 +114,38 @@
 "Play sounds for breaks" = "Tocar sons nos intervalos";
 "Volume" = "Volume";
 "A soft chime for the heads-up, the start of a break and its end." = "Um som suave no aviso, no início e no fim de cada intervalo.";
+
+"In a moment" = "Em instantes";
+"After %@" = "Após %@";
+"General" = "Geral";
+"Smart Pause" = "Pausa inteligente";
+"Schedule" = "Agenda";
+"Hold breaks" = "Segurar intervalos";
+"During calls and meetings" = "Durante chamadas e reuniões";
+"While I'm typing or dragging" = "Enquanto digito ou arrasto";
+"While an app is in full screen" = "Quando um app está em tela cheia";
+"Focus apps" = "Apps de foco";
+"Add App…" = "Adicionar app…";
+"Add" = "Adicionar";
+"Remove" = "Remover";
+"A break that comes due waits until the call ends or you leave the app. Typing holds it for up to a minute, until you pause." = "Um intervalo que chega espera a chamada terminar ou você sair do app. Enquanto você digita, espera até um minuto por uma pausa.";
+"Work hours" = "Horário de trabalho";
+"Only remind me during work hours" = "Lembrar só no horário de trabalho";
+"Days" = "Dias";
+"Hours" = "Horário";
+"to" = "às";
+"Outside these hours Sway stays quiet. When they begin, a fresh countdown starts." = "Fora desse horário o Sway fica quieto. Quando ele começa, uma contagem nova começa.";
+"Planned breaks" = "Intervalos planejados";
+"Name" = "Nome";
+"for" = "por";
+"Add Break" = "Adicionar intervalo";
+"Lunch" = "Almoço";
+"Walk" = "Caminhada";
+"Break" = "Intervalo";
+"Each starts at its time with its own name and length, and gets a heads-up like other breaks. One whose time passes while you're away is skipped." = "Cada um começa no seu horário, com nome e duração próprios, e tem aviso como os outros intervalos. Se o horário passar enquanto você está ausente, ele é pulado.";
+"Off hours" = "Fora do horário";
+"Outside work hours" = "Fora do horário de trabalho";
+"Back at %@" = "Volta às %@";
+"Back %@" = "Volta %@";
+"Start reminders anyway" = "Lembrar mesmo assim";
+"%@ in" = "%@ em";

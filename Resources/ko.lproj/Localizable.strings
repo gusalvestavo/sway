@@ -58,7 +58,6 @@
 "That counts as a break, so the timer started over." = "휴식으로 간주되어 타이머가 다시 시작됐어요.";
 
 /* Settings window */
-"Settings" = "설정";
 "Settings…" = "설정…";
 "Pause when away after" = "자리 비움으로 일시정지";
 "No keyboard, mouse or trackpad input for this long stops the countdown." = "이 시간 동안 키보드, 마우스, 트랙패드 입력이 없으면 카운트다운이 멈춥니다.";
@@ -97,9 +96,6 @@
 "Calls are noticed by the microphone or camera being in use, videos by an app keeping the screen awake. Keep-awake apps count as a video." = "통화는 마이크나 카메라 사용으로, 비디오는 화면을 켜 두는 앱으로 감지합니다. 화면을 켜 두는 앱은 비디오로 간주됩니다.";
 "After the call" = "통화 후";
 "Next break" = "다음 휴식";
-"A break that comes due during a call waits until it ends." = "통화 중에 휴식 시간이 되면 통화가 끝날 때까지 기다립니다.";
-"During calls" = "통화 중";
-"Hold breaks until the call ends" = "통화가 끝날 때까지 휴식 미루기";
 
 /* Welcome window */
 "Welcome to Sway" = "Sway에 오신 것을 환영합니다";
@@ -118,3 +114,38 @@
 "Play sounds for breaks" = "휴식 시 사운드 재생";
 "Volume" = "음량";
 "A soft chime for the heads-up, the start of a break and its end." = "미리 알림, 휴식 시작과 끝에 부드러운 소리가 울립니다.";
+
+"In a moment" = "잠시 후";
+"After %@" = "%@ 후";
+"General" = "일반";
+"Smart Pause" = "스마트 일시정지";
+"Schedule" = "일정";
+"Hold breaks" = "휴식 보류";
+"During calls and meetings" = "통화 및 회의 중";
+"While I'm typing or dragging" = "입력하거나 드래그하는 중";
+"While an app is in full screen" = "앱이 전체 화면일 때";
+"Focus apps" = "집중 앱";
+"Add App…" = "앱 추가…";
+"Add" = "추가";
+"Remove" = "제거";
+"A break that comes due waits until the call ends or you leave the app. Typing holds it for up to a minute, until you pause." = "휴식 시간이 되어도 통화가 끝나거나 앱을 벗어날 때까지 기다립니다. 입력 중에는 멈출 때까지 최대 1분 기다립니다.";
+"Work hours" = "근무 시간";
+"Only remind me during work hours" = "근무 시간에만 알림";
+"Days" = "요일";
+"Hours" = "시간";
+"to" = "~";
+"Outside these hours Sway stays quiet. When they begin, a fresh countdown starts." = "근무 시간 외에는 Sway가 알리지 않습니다. 근무 시간이 시작되면 새 카운트다운이 시작됩니다.";
+"Planned breaks" = "예정된 휴식";
+"Name" = "이름";
+"for" = "부터";
+"Add Break" = "휴식 추가";
+"Lunch" = "점심";
+"Walk" = "산책";
+"Break" = "휴식";
+"Each starts at its time with its own name and length, and gets a heads-up like other breaks. One whose time passes while you're away is skipped." = "각 휴식은 지정한 시각에 고유한 이름과 길이로 시작하며, 다른 휴식처럼 미리 알려 줍니다. 자리를 비운 사이 시각이 지나면 건너뜁니다.";
+"Off hours" = "근무 시간 외";
+"Outside work hours" = "근무 시간이 아닙니다";
+"Back at %@" = "%@에 재개";
+"Back %@" = "%@ 재개";
+"Start reminders anyway" = "그래도 알림 받기";
+"%@ in" = "%@까지";

@@ -58,7 +58,6 @@
 "That counts as a break, so the timer started over." = "That counts as a break, so the timer started over.";
 
 /* Settings window */
-"Settings" = "Settings";
 "Settings…" = "Settings…";
 "Pause when away after" = "Pause when away after";
 "No keyboard, mouse or trackpad input for this long stops the countdown." = "No keyboard, mouse or trackpad input for this long stops the countdown.";
@@ -97,9 +96,6 @@
 "Calls are noticed by the microphone or camera being in use, videos by an app keeping the screen awake. Keep-awake apps count as a video." = "Calls are noticed by the microphone or camera being in use, videos by an app keeping the screen awake. Keep-awake apps count as a video.";
 "After the call" = "After the call";
 "Next break" = "Next break";
-"A break that comes due during a call waits until it ends." = "A break that comes due during a call waits until it ends.";
-"During calls" = "During calls";
-"Hold breaks until the call ends" = "Hold breaks until the call ends";
 
 /* Welcome window */
 "Welcome to Sway" = "Welcome to Sway";
@@ -118,3 +114,38 @@
 "Play sounds for breaks" = "Play sounds for breaks";
 "Volume" = "Volume";
 "A soft chime for the heads-up, the start of a break and its end." = "A soft chime for the heads-up, the start of a break and its end.";
+
+"In a moment" = "In a moment";
+"After %@" = "After %@";
+"General" = "General";
+"Smart Pause" = "Smart Pause";
+"Schedule" = "Schedule";
+"Hold breaks" = "Hold breaks";
+"During calls and meetings" = "During calls and meetings";
+"While I'm typing or dragging" = "While I'm typing or dragging";
+"While an app is in full screen" = "While an app is in full screen";
+"Focus apps" = "Focus apps";
+"Add App…" = "Add App…";
+"Add" = "Add";
+"Remove" = "Remove";
+"A break that comes due waits until the call ends or you leave the app. Typing holds it for up to a minute, until you pause." = "A break that comes due waits until the call ends or you leave the app. Typing holds it for up to a minute, until you pause.";
+"Work hours" = "Work hours";
+"Only remind me during work hours" = "Only remind me during work hours";
+"Days" = "Days";
+"Hours" = "Hours";
+"to" = "to";
+"Outside these hours Sway stays quiet. When they begin, a fresh countdown starts." = "Outside these hours Sway stays quiet. When they begin, a fresh countdown starts.";
+"Planned breaks" = "Planned breaks";
+"Name" = "Name";
+"for" = "for";
+"Add Break" = "Add Break";
+"Lunch" = "Lunch";
+"Walk" = "Walk";
+"Break" = "Break";
+"Each starts at its time with its own name and length, and gets a heads-up like other breaks. One whose time passes while you're away is skipped." = "Each starts at its time with its own name and length, and gets a heads-up like other breaks. One whose time passes while you're away is skipped.";
+"Off hours" = "Off hours";
+"Outside work hours" = "Outside work hours";
+"Back at %@" = "Back at %@";
+"Back %@" = "Back %@";
+"Start reminders anyway" = "Start reminders anyway";
+"%@ in" = "%@ in";

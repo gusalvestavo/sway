@@ -58,7 +58,6 @@
 "That counts as a break, so the timer started over." = "Conta come una pausa, quindi il timer è ripartito.";
 
 /* Settings window */
-"Settings" = "Impostazioni";
 "Settings…" = "Impostazioni…";
 "Pause when away after" = "Metti in pausa se assente dopo";
 "No keyboard, mouse or trackpad input for this long stops the countdown." = "Senza usare tastiera, mouse o trackpad per questo tempo, il conto alla rovescia si ferma.";
@@ -97,9 +96,6 @@
 "Calls are noticed by the microphone or camera being in use, videos by an app keeping the screen awake. Keep-awake apps count as a video." = "Le chiamate vengono rilevate dal microfono o dalla fotocamera in uso, i video da un’app che tiene lo schermo acceso. Le app che tengono lo schermo acceso contano come video.";
 "After the call" = "Dopo la chiamata";
 "Next break" = "Prossima pausa";
-"A break that comes due during a call waits until it ends." = "Una pausa che scade durante una chiamata aspetta che finisca.";
-"During calls" = "Durante le chiamate";
-"Hold breaks until the call ends" = "Rimanda le pause alla fine della chiamata";
 
 /* Welcome window */
 "Welcome to Sway" = "Benvenuto in Sway";
@@ -118,3 +114,38 @@
 "Play sounds for breaks" = "Riproduci suoni per le pause";
 "Volume" = "Volume";
 "A soft chime for the heads-up, the start of a break and its end." = "Un suono delicato per l’avviso, all’inizio e alla fine di una pausa.";
+
+"In a moment" = "Tra un attimo";
+"After %@" = "Dopo %@";
+"General" = "Generali";
+"Smart Pause" = "Pausa intelligente";
+"Schedule" = "Programma";
+"Hold breaks" = "Rimanda le pause";
+"During calls and meetings" = "Durante chiamate e riunioni";
+"While I'm typing or dragging" = "Mentre scrivo o trascino";
+"While an app is in full screen" = "Quando un’app è a schermo intero";
+"Focus apps" = "App di concentrazione";
+"Add App…" = "Aggiungi app…";
+"Add" = "Aggiungi";
+"Remove" = "Rimuovi";
+"A break that comes due waits until the call ends or you leave the app. Typing holds it for up to a minute, until you pause." = "Una pausa in arrivo aspetta la fine della chiamata o che tu esca dall’app. Mentre scrivi, aspetta fino a un minuto che ti fermi.";
+"Work hours" = "Orario di lavoro";
+"Only remind me during work hours" = "Ricordamelo solo durante l’orario di lavoro";
+"Days" = "Giorni";
+"Hours" = "Orario";
+"to" = "alle";
+"Outside these hours Sway stays quiet. When they begin, a fresh countdown starts." = "Fuori da questo orario Sway resta in silenzio. Quando inizia, parte un nuovo conto alla rovescia.";
+"Planned breaks" = "Pause programmate";
+"Name" = "Nome";
+"for" = "per";
+"Add Break" = "Aggiungi pausa";
+"Lunch" = "Pranzo";
+"Walk" = "Passeggiata";
+"Break" = "Pausa";
+"Each starts at its time with its own name and length, and gets a heads-up like other breaks. One whose time passes while you're away is skipped." = "Ognuna inizia alla sua ora con il proprio nome e la propria durata, e viene annunciata come le altre pause. Se la sua ora passa mentre sei assente, viene saltata.";
+"Off hours" = "Fuori orario";
+"Outside work hours" = "Fuori dall’orario di lavoro";
+"Back at %@" = "Riprende alle %@";
+"Back %@" = "Riprende %@";
+"Start reminders anyway" = "Ricordamelo comunque";
+"%@ in" = "%@ tra";
