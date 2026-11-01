@@ -11,7 +11,7 @@ A small macOS menu bar app that reminds you to take breaks.
 Designed to encourage you to respect your time.
 
 <p align="center">
-  <img src="docs/mascot.png" alt="Sway's cat mascot through a break: working on a laptop, stretching during the break, and cheering when it's over" width="480">
+  <img src="docs/mascot.png" alt="Sway's cat mascot through the day: waving a good morning, working on a laptop, stretching during a break, and cheering when it's over" width="600">
 </p>
 
 <p align="center">
