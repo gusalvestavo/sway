@@ -1,10 +1,9 @@
-<p align="center">
-  <img src="docs/logo.svg" alt="Sway logo" width="120">
-</p>
-
-# Sway
-
-*Find your flow.*
+<h1 align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/header-dark.png">
+    <img src="docs/header-light.png" alt="Sway: Find your flow." width="360">
+  </picture>
+</h1>
 
 A small macOS menu bar app that reminds you to take breaks.
 
@@ -29,6 +28,19 @@ Designed to encourage you to respect your time.
 <p align="center">
   <img src="docs/menubar.png" alt="Sway's menu bar icon in three states: counting down with 40m, paused with a pause badge, and a beach umbrella outside work hours" width="480">
 </p>
+
+## Install
+
+1. Download the latest **Sway-x.y.zip** from [Releases](https://github.com/gusalvestavo/sway/releases/latest) and unzip it.
+2. Move **Sway.app** to your **Applications** folder and open it. Sway lives in the menu bar, not the Dock.
+
+Requires macOS 13 or later. Universal: runs on Apple silicon and Intel Macs.
+
+Sway isn't notarized by Apple yet, so macOS blocks it the first time. Open **System Settings → Privacy & Security**, scroll to the message about Sway and click **Open Anyway**, or run this once in Terminal:
+
+```sh
+xattr -dr com.apple.quarantine /Applications/Sway.app
+```
 
 ## Features
 
@@ -57,10 +69,13 @@ Designed to encourage you to respect your time.
   <img src="docs/settings.png" alt="Sway's Settings window: the Wellness tab with blink and posture nudges, and the Schedule tab with work hours and planned breaks for lunch and a walk" width="720">
 </p>
 
-## Requirements
+## Build from source
 
-- macOS 13 or later (Liquid Glass on macOS 26+)
-- Xcode, for `swiftc` and `actool` (the icon compiler)
+You'll need macOS 13 or later and Xcode, for `swiftc` and `actool` (the icon compiler). Then run:
+
+```sh
+./build.sh
+```
 
 ## License
 
