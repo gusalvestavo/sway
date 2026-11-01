@@ -19,7 +19,15 @@ Designed to encourage you to respect your time.
 </p>
 
 <p align="center">
-  <img src="docs/popover.png" alt="The heads-up popover under Sway's menu bar icon: the stretching cat, Break in 0:04, with Start now and +1/+3/+5 min snooze" width="480">
+  <img src="docs/popover.png" alt="The heads-up popover under Sway's menu bar icon: the stretching cat, Break in 0:06, with Start now and +1/+3/+5 min snooze" width="480">
+</p>
+
+<p align="center">
+  <img src="docs/nudge.png" alt="A blink nudge under Sway's menu bar icon: the curious cat with Blink slowly a few times, then look at something far away for 20 seconds" width="480">
+</p>
+
+<p align="center">
+  <img src="docs/menubar.png" alt="Sway's menu bar icon in three states: counting down with 40m, paused with a pause badge, and a beach umbrella outside work hours" width="480">
 </p>
 
 ## Features
@@ -44,6 +52,10 @@ Designed to encourage you to respect your time.
 - **Planned breaks** at set times, such as lunch at 12:30 for an hour or a walk at 15:30, each with its own name and length and a heads-up like any other break.
 - **Work interval and break length** right in the menu, and a **Settings window** (gear icon in the menu) with *General* (work interval, break length, long breaks, heads-up, sounds, language, *Launch at Login*), *Wellness* (blink and posture nudges), *Smart Pause* (away detection and when to hold breaks) and *Schedule* (work hours and planned breaks) tabs, all saved between launches. Sleep or a locked screen counts as a break.
 - Available in English, Português (Brasil), Español, Français, Deutsch, Italiano, 日本語, 한국어 and 简体中文, following your Mac's language or the one you pick in Settings.
+
+<p align="center">
+  <img src="docs/settings.png" alt="Sway's Settings window: the Wellness tab with blink and posture nudges, and the Schedule tab with work hours and planned breaks for lunch and a walk" width="720">
+</p>
 
 ## Requirements
 
