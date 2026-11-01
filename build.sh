@@ -24,6 +24,8 @@ cp -R Resources/*.lproj "$APP/Contents/Resources/"
 cp -R Resources/Mascot "$APP/Contents/Resources/"
 # The break chimes, made by tools/sounds.swift.
 cp -R Resources/Sounds "$APP/Contents/Resources/"
+# Fraunces, the display font (SIL Open Font License, see Fonts/OFL.txt).
+cp -R Resources/Fonts "$APP/Contents/Resources/"
 
 cat > "$APP/Contents/Info.plist" <<'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>

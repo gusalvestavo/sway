@@ -196,7 +196,7 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
     /// The cat with the app's name and tagline, above the settings.
     private func brandHeader() -> NSView {
         let name = NSTextField(labelWithString: "Sway")
-        name.font = .systemFont(ofSize: 26, weight: .semibold)
+        name.font = Typography.display(26, weight: .semibold)
         // Sage reads too dark on a dark window, so dark mode uses the lighter leaf green.
         name.textColor = NSColor(name: nil) { appearance in
             appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua ? SwayMark.leaf : SwayMark.sage

@@ -209,15 +209,15 @@ private final class OverlayPanel: BackdropView {
 
         super.init(frame: .zero)
 
-        titleLabel.font = .systemFont(ofSize: 20, weight: .medium)
+        titleLabel.font = Typography.display(20, weight: .medium)
         titleLabel.textColor = .secondaryLabelColor
 
-        timeLabel.font = .monospacedDigitSystemFont(ofSize: 34, weight: .light)
+        timeLabel.font = Typography.timer(34)
         timeLabel.textColor = .white
         timeLabel.translatesAutoresizingMaskIntoConstraints = false
         ring.addSubview(timeLabel)
 
-        messageLabel.font = .systemFont(ofSize: 28, weight: .regular)
+        messageLabel.font = Typography.display(28)
         messageLabel.textColor = .white
         messageLabel.alignment = .center
         messageLabel.preferredMaxLayoutWidth = Self.contentWidth

@@ -158,7 +158,8 @@ final class Welcome: NSObject, NSWindowDelegate {
 
     private func label(_ text: String, size: CGFloat, weight: NSFont.Weight) -> NSTextField {
         let label = NSTextField(wrappingLabelWithString: text)
-        label.font = .systemFont(ofSize: size, weight: weight)
+        // Headings use the display font; smaller subtitles keep the system font.
+        label.font = size >= 20 ? Typography.display(size, weight: weight) : .systemFont(ofSize: size, weight: weight)
         label.alignment = .center
         label.preferredMaxLayoutWidth = 440
         return label

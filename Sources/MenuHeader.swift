@@ -15,7 +15,7 @@ final class MenuHeaderView: NSView {
     var onAddTime: (Int) -> Void = { _ in }
 
     private let caption = NSTextField(labelWithString: "")
-    private let value = RollingTextView(font: .monospacedDigitSystemFont(ofSize: 34, weight: .light))
+    private let value = RollingTextView(font: Typography.timer(34))
     private let addRow: NSStackView
     private let stack = NSStackView()
     private let mascot = MascotView(.focus, height: 64)

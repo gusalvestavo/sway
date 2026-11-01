@@ -32,7 +32,7 @@ final class Greeting: NSObject {
 
         let cat = MascotView(.excited, height: 84)
 
-        titleLabel.font = .systemFont(ofSize: 17, weight: .semibold)
+        titleLabel.font = Typography.display(17, weight: .semibold)
         messageLabel.font = .systemFont(ofSize: 13)
         messageLabel.preferredMaxLayoutWidth = 240
         countdownLabel.font = .systemFont(ofSize: 11)
